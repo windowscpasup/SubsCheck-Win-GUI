@@ -1,7 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
@@ -9,14 +8,9 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Net.NetworkInformation;
-using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Xml.Linq;
-using static System.Net.Mime.MediaTypeNames;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.Button;
 
 namespace subs_check.win.gui
 {
@@ -154,6 +148,13 @@ namespace subs_check.win.gui
             this.Text = 标题 + " TG:CMLiussss BY:CM喂饭 干货满满";
             comboBox1.Text = "本地";
             ReadConfig();
+            string subsCheckPath = Path.Combine(executablePath, "subs-check.exe");
+            if (File.Exists(subsCheckPath)) button1.Enabled = true;
+            else 
+            {
+                richTextBox1.AppendText("错误: 没有找到 subs-check.exe 文件。\r\n");
+                MessageBox.Show("缺少 subs-check.exe 核心文件。\n\n您可以前往 https://github.com/beck-8/subs-check/releases 自行下载！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
             await CheckGitHubVersionAsync();
         }
 
