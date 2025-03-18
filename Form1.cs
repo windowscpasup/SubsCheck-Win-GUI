@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -6,6 +7,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Net.NetworkInformation;
 using System.Security.Policy;
 using System.Text;
@@ -122,13 +124,27 @@ namespace subs_check.win.gui
             base.OnFormClosing(e);
         }
 
-        private void timer1_Tick(object sender, EventArgs e)//初始化
+        private async void timer1_Tick(object sender, EventArgs e)//初始化
         {
+            timer1.Enabled = false;
+            if (button2.Text == "高级设置∧") button2_Click(sender, e);
             // 检查并创建config文件夹
             string executablePath = System.IO.Path.GetDirectoryName(System.Windows.Forms.Application.ExecutablePath);
             string configFolderPath = System.IO.Path.Combine(executablePath, "config");
             if (!System.IO.Directory.Exists(configFolderPath))
             {
+                // 文件不存在，可以给用户反馈
+                string 免责声明 = "SubsCheck-Win-GUI 项目仅供教育、研究和安全测试目的而设计和开发。本项目旨在为安全研究人员、学术界人士及技术爱好者提供一个探索和实践网络通信技术的工具。\r\n在下载和使用本项目代码时，使用者必须严格遵守其所适用的法律和规定。使用者有责任确保其行为符合所在地区的法律框架、规章制度及其他相关规定。\r\n\r\n使用条款\r\n\r\n教育与研究用途：本软件仅可用于网络技术和编程领域的学习、研究和安全测试。\r\n禁止非法使用：严禁将 SubsCheck-Win-GUI 用于任何非法活动或违反使用者所在地区法律法规的行为。\r\n使用时限：基于学习和研究目的，建议用户在完成研究或学习后，或在安装后的24小时内，删除本软件及所有相关文件。\r\n免责声明：SubsCheck-Win-GUI 的创建者和贡献者不对因使用或滥用本软件而导致的任何损害或法律问题负责。\r\n用户责任：用户对使用本软件的方式以及由此产生的任何后果完全负责。\r\n无技术支持：本软件的创建者不提供任何技术支持或使用协助。\r\n知情同意：使用 SubsCheck-Win-GUI 即表示您已阅读并理解本免责声明，并同意受其条款的约束。\r\n\r\n请记住：本软件的主要目的是促进学习、研究和安全测试。创作者不支持或认可任何其他用途。使用者应当在合法和负责任的前提下使用本工具。\r\n\r\n同意以上条款请点击\"是 / Yes\"，否则程序将退出。";
+
+                // 显示带有 "同意" 和 "拒绝" 选项的对话框
+                DialogResult result = MessageBox.Show(免责声明, "SubsCheck-Win-GUI 免责声明", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+                // 如果用户点击 "拒绝" (对应于 No 按钮)
+                if (result == DialogResult.No)
+                {
+                    // 退出程序
+                    Environment.Exit(0); // 立即退出程序
+                }
                 System.IO.Directory.CreateDirectory(configFolderPath);
             }
 
@@ -136,14 +152,69 @@ namespace subs_check.win.gui
             版本号 = "v" + myFileVersionInfo.FileVersion;
             标题 = "SubsCheck Win GUI " + 版本号;
             this.Text = 标题 + " TG:CMLiussss BY:CM喂饭 干货满满";
-
             comboBox1.Text = "本地";
             ReadConfig();
-            if (button2.Text == "高级设置∧")
+            await CheckGitHubVersionAsync();
+        }
+
+        private async Task CheckGitHubVersionAsync()
+        {
+            try
             {
-                button2_Click(sender, e);
+                // 首先检查是否有网络连接
+                if (!IsNetworkAvailable())
+                {
+                    return; // 静默返回，不显示错误
+                }
+
+                using (HttpClient client = new HttpClient())
+                {
+                    try
+                    {
+                        client.DefaultRequestHeaders.UserAgent.ParseAdd("request");
+                        client.Timeout = TimeSpan.FromSeconds(5); // 设置5秒超时
+
+                        string url = "https://api.github.com/repos/cmliu/SubsCheck-Win-GUI/releases/latest";
+                        HttpResponseMessage response = await client.GetAsync(url);
+
+                        if (response.IsSuccessStatusCode)
+                        {
+                            string responseBody = await response.Content.ReadAsStringAsync();
+                            JObject json = JObject.Parse(responseBody);
+                            string latestVersion = json["tag_name"].ToString();
+
+                            if (latestVersion != 版本号)
+                            {
+                                标题 = "SubsCheck Win GUI " + 版本号 + $"  发现新版本: {latestVersion} 请及时更新！";
+                                this.Text = 标题;
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        // 静默处理所有异常（网络错误、超时、JSON解析错误等）
+                        return;
+                    }
+                }
             }
-            timer1.Enabled = false;
+            catch
+            {
+                // 静默处理任何其他异常
+                return;
+            }
+        }
+
+        // 添加检查网络连接的辅助方法
+        private bool IsNetworkAvailable()
+        {
+            try
+            {
+                return NetworkInterface.GetIsNetworkAvailable();
+            }
+            catch
+            {
+                return false; // 如果无法检查网络状态，假设网络不可用
+            }
         }
 
         private void ReadConfig()//读取配置文件
@@ -222,14 +293,6 @@ namespace subs_check.win.gui
                     else checkBox1.Checked = false;
 
                 }
-                else
-                {
-                    MessageBox.Show("配置文件不存在，将使用默认设置。", "提示",
-                        MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-                    // 创建一个示例配置文件
-                    CreateSampleConfigFile(configFilePath);
-                }
             }
             catch (Exception ex)
             {
@@ -272,30 +335,6 @@ namespace subs_check.win.gui
                 }
             }
             return null;
-        }
-
-        private void CreateSampleConfigFile(string configFilePath)
-        {
-            try
-            {
-                // 创建一个简单的配置示例
-                string sampleConfig =
-@"# 配置文件示例 https://github.com/beck-8/subs-check/blob/master/config/config.example.yaml
-concurrent: 16
-check_interval: 300
-timeout: 5000
-speed_limit: 1024
-speed_test_time: 10
-subscription_port: 8199
-save_method: local
-";
-                File.WriteAllText(configFilePath, sampleConfig);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"创建示例配置文件时发生错误: {ex.Message}", "错误",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
         }
 
         private void SaveConfig()//保存配置文件
