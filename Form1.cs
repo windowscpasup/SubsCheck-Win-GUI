@@ -517,6 +517,9 @@ namespace subs_check.win.gui
                 comboBox1.Enabled = false;
                 textBox1.ReadOnly = true;
                 groupBox3.Enabled = false;
+                groupBox4.Enabled = false;
+                groupBox5.Enabled = false;
+                groupBox6.Enabled = false;
                 SaveConfig();
                 button1.Text = "停止";
 
@@ -550,6 +553,9 @@ namespace subs_check.win.gui
                 comboBox1.Enabled = true;
                 textBox1.ReadOnly = false;
                 groupBox3.Enabled = true;
+                groupBox4.Enabled = true;
+                groupBox5.Enabled = true;
+                groupBox6.Enabled = true;
                 button1.Text = "启动";
 
                 // 更新菜单项的启用状态
