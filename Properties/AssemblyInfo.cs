@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // 有关程序集的一般信息由以下
 // 控制。更改这些特性值可修改
 // 与程序集关联的信息。
-[assembly: AssemblyTitle("subs-check.win.gui")]
+[assembly: AssemblyTitle("SubsCheck Win GUI")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("subs-check.win.gui")]
+[assembly: AssemblyCompany("TG:CMLiussss")]
+[assembly: AssemblyProduct("SubsCheck Win GUI")]
 [assembly: AssemblyCopyright("Copyright ©  2025")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -29,5 +29,5 @@ using System.Runtime.InteropServices;
 //      生成号
 //      修订号
 //
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyVersion("0.0.0.1")]
+[assembly: AssemblyFileVersion("0.0.0.1")]
