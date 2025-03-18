@@ -32,6 +32,22 @@ namespace subs_check.win.gui
             // 注册窗体大小改变事件
             this.Resize += new EventHandler(Form1_Resize);
 
+            toolTip1.SetToolTip(numericUpDown1, "并发线程数：推荐 宽带峰值/50M。");
+            toolTip1.SetToolTip(numericUpDown2, "检查间隔时间(分钟)：放置后台的时候，下次自动测速的间隔时间。");
+            toolTip1.SetToolTip(numericUpDown3, "超时时间(毫秒)：节点的最大延迟。");
+            toolTip1.SetToolTip(numericUpDown4, "最低测速结果舍弃(KB/s)。");
+            toolTip1.SetToolTip(numericUpDown5, "下载测试时间(s)：与下载链接大小相关，默认最大测试10s。");
+            toolTip1.SetToolTip(numericUpDown6, "本地监听端口：用于直接返回节点信息，方便订阅。");
+            toolTip1.SetToolTip(textBox1, "节点池订阅地址：支持 base64/clash 格式的订阅链接。");
+            toolTip1.SetToolTip(checkBox1, "以节点IP查询位置重命名节点。\n质量差的节点可能造成IP查询失败，造成整体检查速度稍微变慢。");
+            toolTip1.SetToolTip(comboBox3, "GitHub 代理：代理订阅 GitHub raw 节点池。");
+            toolTip1.SetToolTip(comboBox2, "测速地址：注意 并发数*节点速度<最大网速 否则测速结果不准确\n尽量不要使用Speedtest，Cloudflare提供的下载链接，因为很多节点屏蔽测速网站。");
+            toolTip1.SetToolTip(textBox7, "将测速结果推送到Worker的地址。");
+            toolTip1.SetToolTip(textBox6, "Worker令牌。");
+            toolTip1.SetToolTip(comboBox1, "测速结果的保存方法。");
+            toolTip1.SetToolTip(textBox2, "Gist ID：注意！非Github用户名！");
+            toolTip1.SetToolTip(textBox3, "Github TOKEN");
+            toolTip1.SetToolTip(textBox10, "Github用户名：无实际作用，只是方便生成订阅链接");
             // 设置通知图标的上下文菜单
             SetupNotifyIconContextMenu();
         }
@@ -293,6 +309,26 @@ namespace subs_check.win.gui
                     if (renamenode != null && renamenode == "true") checkBox1.Checked = true;
                     else checkBox1.Checked = false;
 
+                    string githubgistid = 读取config字符串(config, "github-gist-id");
+                    if (githubgistid != null) textBox2.Text = githubgistid;
+                    string githubtoken = 读取config字符串(config, "github-token");
+                    if (githubtoken != null) textBox3.Text = githubtoken;
+                    string githubname = 读取config字符串(config, "github-name");
+                    if (githubname != null) textBox10.Text = githubname;
+                    string githubapimirror = 读取config字符串(config, "github-api-mirror");
+                    if (githubapimirror != null) textBox4.Text = githubapimirror;
+
+                    string workerurl = 读取config字符串(config, "worker-url");
+                    if (workerurl != null) textBox7.Text = workerurl;
+                    string workertoken = 读取config字符串(config, "worker-token");
+                    if (workertoken != null) textBox6.Text = workertoken;
+
+                    string webdavusername = 读取config字符串(config, "webdav-username");
+                    if (webdavusername != null) textBox9.Text = webdavusername;
+                    string webdavpassword = 读取config字符串(config, "webdav-password");
+                    if (webdavpassword != null) textBox8.Text = webdavpassword;
+                    string webdavurl = 读取config字符串(config, "webdav-url");
+                    if (webdavurl != null) textBox5.Text = webdavurl;
                 }
             }
             catch (Exception ex)
@@ -355,11 +391,25 @@ namespace subs_check.win.gui
                 config["min-speed"] = (int)numericUpDown4.Value;
                 config["download-timeout"] = (int)numericUpDown5.Value;
 
-                if (!string.IsNullOrEmpty(comboBox2.Text))
-                    config["speed-test-url"] = comboBox2.Text;
+                if (!string.IsNullOrEmpty(comboBox2.Text)) config["speed-test-url"] = comboBox2.Text;
 
                 // 保存save-method，将"本地"转换为"local"
                 config["save-method"] = comboBox1.Text == "本地" ? "local" : comboBox1.Text;
+
+                // 保存gist参数
+                config["github-gist-id"] = textBox2.Text;
+                config["github-token"] = textBox3.Text;
+                config["github-name"] = textBox10.Text;
+                config["github-api-mirror"] = textBox4.Text;
+
+                // 保存r2参数
+                config["worker-url"] = textBox7.Text;
+                config["worker-token"] = textBox6.Text;
+
+                // 保存webdav参数
+                config["webdav-username"] = textBox9.Text;
+                config["webdav-password"] = textBox8.Text;
+                config["webdav-url"] = textBox5.Text;
 
                 // 保存listen-port
                 config["listen-port"] = $@":{numericUpDown6.Value}";
@@ -432,6 +482,7 @@ namespace subs_check.win.gui
                 button2.Text = "高级设置∧";
                 groupBox3.Visible = true;
             }
+            判断保存类型();
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -496,7 +547,7 @@ namespace subs_check.win.gui
                 numericUpDown4.Enabled = true;
                 numericUpDown5.Enabled = true;
                 numericUpDown6.Enabled = true;
-                //comboBox1.Enabled = true;
+                comboBox1.Enabled = true;
                 textBox1.ReadOnly = false;
                 groupBox3.Enabled = true;
                 button1.Text = "启动";
@@ -610,6 +661,24 @@ namespace subs_check.win.gui
                     // 检查是否包含"下次检查时间"信息
                     if (cleanText.Contains("下次检查时间:"))
                     {
+                        if (button3.Enabled == false || button4.Enabled == false)
+                        {
+                            string executablePath = System.IO.Path.GetDirectoryName(System.Windows.Forms.Application.ExecutablePath);
+                            string outputFolderPath = System.IO.Path.Combine(executablePath, "output");
+                            if (System.IO.Directory.Exists(outputFolderPath))
+                            {
+                                string alltxtFilePath = System.IO.Path.Combine(outputFolderPath, "all.txt");
+                                if (System.IO.File.Exists(alltxtFilePath))
+                                {
+                                    button3.Enabled = true;
+                                }
+                                string allyamlFilePath = System.IO.Path.Combine(outputFolderPath, "all.yaml");
+                                if (System.IO.File.Exists(allyamlFilePath))
+                                {
+                                    button4.Enabled = true;
+                                }
+                            }
+                        }
                         // 提取完整的下次检查时间信息
                         int startIndex = cleanText.IndexOf("下次检查时间:");
                         nextCheckTime = cleanText.Substring(startIndex);
@@ -733,7 +802,26 @@ namespace subs_check.win.gui
             {
                 // 构造URL
                 string url = $"http://127.0.0.1:{numericUpDown6.Value}/all.txt";
-
+                if(comboBox1.Text== "gist")
+                {
+                    if (textBox10.Text != null && textBox10.Text != "")
+                    {
+                        url = $"https://gist.githubusercontent.com/{textBox10.Text}/{textBox2.Text}/raw/all.txt";
+                    }
+                    else
+                    {
+                        // 弹出提示框，提示github name为空
+                        MessageBox.Show("GitHub 用户名为空，无法获取 Gist 订阅链接！",
+                                       "提示",
+                                       MessageBoxButtons.OK,
+                                       MessageBoxIcon.Warning);
+                        return; // 提前返回，不复制空链接
+                    }
+                } 
+                else if(comboBox1.Text == "r2")
+                {
+                    url = $"{textBox7.Text}/storage?key=all.txt&token={textBox6.Text}";
+                }
                 // 将URL复制到剪贴板
                 Clipboard.SetText(url);
                 button4.Text = "Clash订阅";
@@ -756,7 +844,26 @@ namespace subs_check.win.gui
             {
                 // 构造URL
                 string url = $"http://127.0.0.1:{numericUpDown6.Value}/all.yaml";
-
+                if (comboBox1.Text == "gist")
+                {
+                    if (textBox10.Text != null && textBox10.Text != "")
+                    {
+                        url = $"https://gist.githubusercontent.com/{textBox10.Text}/{textBox2.Text}/raw/all.yaml";
+                    }
+                    else
+                    {
+                        // 弹出提示框，提示github name为空
+                        MessageBox.Show("GitHub 用户名为空，无法获取 Gist 订阅链接！",
+                                       "提示",
+                                       MessageBoxButtons.OK,
+                                       MessageBoxIcon.Warning);
+                        return; // 提前返回，不复制空链接
+                    }
+                }
+                else if (comboBox1.Text == "r2")
+                {
+                    url = $"{textBox7.Text}/storage?key=all.yaml&token={textBox6.Text}";
+                }
                 // 将URL复制到剪贴板
                 Clipboard.SetText(url);
                 button3.Text = "Base64订阅";
@@ -808,6 +915,122 @@ namespace subs_check.win.gui
 
                 // 激活窗口（使其获得焦点）
                 this.Activate();
+            }
+        }
+
+        private void comboBox3_Leave(object sender, EventArgs e)
+        {
+            // 检查是否有内容
+            if (string.IsNullOrWhiteSpace(comboBox3.Text))
+                return;
+
+            string input = comboBox3.Text.Trim();
+
+            // 检查是否存在 "://" 协议部分
+            int protocolIndex = input.IndexOf("://");
+            if (protocolIndex >= 0)
+            {
+                // 保留 "://" 之后的内容
+                input = input.Substring(protocolIndex + 3);
+            }
+
+            // 检查是否存在 "/" 路径部分
+            int pathIndex = input.IndexOf('/');
+            if (pathIndex >= 0)
+            {
+                // 只保留 "/" 之前的域名部分
+                input = input.Substring(0, pathIndex);
+            }
+
+            // 更新 comboBox3 的文本
+            comboBox3.Text = input;
+        }
+
+        private void 判断保存类型()
+        {
+            if (comboBox1.Text == "本地" || button2.Text == "高级设置∨")
+            {
+                groupBox4.Visible = false;
+                groupBox5.Visible = false;
+                groupBox6.Visible = false;
+            }
+            else if (comboBox1.Text == "gist" && button2.Text == "高级设置∧")
+            {
+                groupBox4.Visible = true;
+
+                groupBox5.Visible = false;
+                groupBox6.Visible = false;
+            }
+            else if (comboBox1.Text == "r2" && button2.Text == "高级设置∧")
+            {
+                groupBox5.Location = groupBox4.Location;
+                groupBox5.Visible = true;
+
+                groupBox4.Visible = false;
+                groupBox6.Visible = false;
+            }
+            else if (comboBox1.Text == "webdav" && button2.Text == "高级设置∧")
+            {
+                groupBox6.Location = groupBox4.Location;
+                groupBox6.Visible = true;
+
+                groupBox4.Visible = false;
+                groupBox5.Visible = false;
+            }
+        }
+
+        private void comboBox1_TextChanged(object sender, EventArgs e)
+        {
+            判断保存类型();
+        }
+
+        private void textBox3_Enter(object sender, EventArgs e)
+        {
+            textBox3.PasswordChar = '\0';
+            textBox6.PasswordChar = '\0';
+            textBox8.PasswordChar = '\0';
+        }
+
+        private void textBox3_Leave(object sender, EventArgs e)
+        {
+            textBox3.PasswordChar = '*';
+            textBox6.PasswordChar = '*';
+            textBox8.PasswordChar = '*';
+        }
+
+        private void textBox7_Leave(object sender, EventArgs e)
+        {
+            // 检查是否有内容
+            if (string.IsNullOrWhiteSpace(textBox7.Text))
+                return;
+
+            string input = textBox7.Text.Trim();
+
+            try
+            {
+                // 尝试解析为 URI
+                Uri uri = new Uri(input);
+
+                // 构建基础 URL (scheme + authority)
+                string baseUrl = $"{uri.Scheme}://{uri.Authority}";
+
+                // 更新 textBox7 的文本为基础 URL
+                textBox7.Text = baseUrl;
+            }
+            catch (UriFormatException)
+            {
+                // 如果输入的不是有效 URI，尝试使用简单的字符串处理
+                // 查找双斜杠后的第一个斜杠
+                int schemeIndex = input.IndexOf("://");
+                if (schemeIndex >= 0)
+                {
+                    int pathStartIndex = input.IndexOf('/', schemeIndex + 3);
+                    if (pathStartIndex >= 0)
+                    {
+                        // 截取到路径开始之前
+                        textBox7.Text = input.Substring(0, pathStartIndex);
+                    }
+                }
             }
         }
     }
