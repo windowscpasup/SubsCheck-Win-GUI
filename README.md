@@ -33,7 +33,8 @@
 ## 📁 GUI 文件结构
 ```shell
 subs-check.win.gui.exe      # GUI本体
-subs-check.exe              # subs-check x86_32位 原程序本体  
+subs-check.exe              # subs-check x86_32位 内核本体  
+subs-check_Windows_i386.zip # subs-check x86_32位 内核压缩包  
 config
  └─ config.yaml             # subs-check 配置文件  
 output
