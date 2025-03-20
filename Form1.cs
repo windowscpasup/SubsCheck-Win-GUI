@@ -11,6 +11,7 @@ using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.IO.Compression;
 
 namespace subs_check.win.gui
 {
@@ -23,6 +24,7 @@ namespace subs_check.win.gui
         private Icon originalNotifyIcon; // 保存原始图标
         private ToolStripMenuItem startMenuItem;
         private ToolStripMenuItem stopMenuItem;
+        string githubProxyURL;
 
         public Form1()
         {
@@ -164,13 +166,15 @@ namespace subs_check.win.gui
             this.Text = 标题 + " TG:CMLiussss BY:CM喂饭 干货满满";
             comboBox1.Text = "本地";
             ReadConfig();
+            /*
             string subsCheckPath = Path.Combine(executablePath, "subs-check.exe");
             if (File.Exists(subsCheckPath)) button1.Enabled = true;
             else 
             {
-                richTextBox1.AppendText("错误: 没有找到 subs-check.exe 文件。\r\n");
+                Log("没有找到 subs-check.exe 文件。", true);
                 MessageBox.Show("缺少 subs-check.exe 核心文件。\n\n您可以前往 https://github.com/beck-8/subs-check/releases 自行下载！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
+            */
             await CheckGitHubVersionAsync();
         }
 
@@ -415,8 +419,7 @@ namespace subs_check.win.gui
                 config["listen-port"] = $@":{numericUpDown6.Value}";
 
                 // 保存githubproxy
-                if (!string.IsNullOrEmpty(comboBox3.Text))
-                    config["githubproxy"] = comboBox3.Text;
+                if (!string.IsNullOrEmpty(comboBox3.Text)) config["githubproxy"] = comboBox3.Text;
 
                 // 保存sub-urls列表，将textBox1的文本按行分割为列表
                 if (!string.IsNullOrEmpty(textBox1.Text))
@@ -427,12 +430,75 @@ namespace subs_check.win.gui
                     if (!string.IsNullOrEmpty(comboBox3.Text))
                     {
                         const string githubRawPrefix = "https://raw.githubusercontent.com/";
+                        githubProxyURL = $"https://{comboBox3.Text}/";
+                        // 将此代码添加到"自动选择"部分：
+                        if (comboBox3.Text == "自动选择")
+                        {
+                            bool proxyFound = false;
+                            // 将尝试结果保存在richTextBox1中
+                            Log("检测可用 GitHub 代理...");
+
+                            // 遍历comboBox3中的所有项目
+                            for (int j = 0; j < comboBox3.Items.Count; j++)
+                            {
+                                string proxyItem = comboBox3.Items[j].ToString();
+
+                                // 跳过"自动选择"选项
+                                if (proxyItem == "自动选择")
+                                    continue;
+
+                                string checkUrl = $"https://{proxyItem}/https://raw.githubusercontent.com/cmliu/SubsCheck-Win-GUI/master/packages.config";
+                                Log($"正在测试 GitHub 代理: {proxyItem}");
+                                richTextBox1.Refresh();
+
+                                try
+                                {
+                                    using (HttpClient client = new HttpClient())
+                                    {
+                                        client.Timeout = TimeSpan.FromSeconds(5); // 设置5秒超时
+                                                                                  // 添加User-Agent头，避免被拒绝访问
+                                        client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 cmliu/SubsCheck-Win-GUI");
+
+                                        HttpResponseMessage response = client.GetAsync(checkUrl).Result;
+                                        if (response.IsSuccessStatusCode)
+                                        {
+                                            // 找到可用代理
+                                            githubProxyURL = $"https://{proxyItem}/";
+                                            Log($"找到可用 GitHub 代理: {proxyItem}");
+                                            proxyFound = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                    // 记录错误但继续尝试下一个
+                                    Log($"代理 {proxyItem} 测试失败: {ex.Message}", true);
+                                    richTextBox1.Refresh();
+                                }
+                            }
+
+                            // 如果没有找到可用的代理
+                            if (!proxyFound)
+                            {
+                                Log("未找到可用的 GitHub 代理，请在高级设置中手动设置。", true);
+                                MessageBox.Show("未找到可用的 GitHub 代理。\n\n请打开高级设置手动填入一个可用的Github Proxy，或检查您的网络连接。",
+                                    "代理检测失败",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Warning);
+
+                                // 如果没有找到可用代理，可以设置一个默认值或保持为"自动选择"
+                                // 这里我们设置为空，让用户手动选择
+                                githubProxyURL = "";
+                            }
+                        }
+
                         for (int i = 0; i < subUrls.Count; i++)
                         {
                             if (subUrls[i].StartsWith(githubRawPrefix))
                             {
                                 // 替换为代理 URL 格式
-                                subUrls[i] = "https://" + comboBox3.Text + "/" + githubRawPrefix + subUrls[i].Substring(githubRawPrefix.Length);
+                                subUrls[i] = githubProxyURL  + githubRawPrefix + subUrls[i].Substring(githubRawPrefix.Length);
                             }
                         }
                     }
@@ -520,15 +586,18 @@ namespace subs_check.win.gui
                 groupBox4.Enabled = false;
                 groupBox5.Enabled = false;
                 groupBox6.Enabled = false;
-                SaveConfig();
                 button1.Text = "停止";
+
+                // 清空 richTextBox1
+                richTextBox1.Clear();
+                SaveConfig();
 
                 // 更新菜单项的启用状态
                 startMenuItem.Enabled = false;
                 stopMenuItem.Enabled = true;
 
                 // 清空 richTextBox1
-                richTextBox1.Clear();
+                //richTextBox1.Clear();
 
                 notifyIcon1.Text = "SubsCheck: 已就绪";
 
@@ -564,7 +633,157 @@ namespace subs_check.win.gui
             }
         }
 
-        private void StartSubsCheckProcess()
+        private async Task DownloadSubsCheckEXE()
+        {
+            try
+            {
+                Log("正在检查网络连接...");
+
+                // 首先检查是否有网络连接
+                if (!IsNetworkAvailable())
+                {
+                    Log("网络连接不可用，无法下载核心文件。", true);
+                    MessageBox.Show("缺少 subs-check.exe 核心文件。\n\n您可以前往 https://github.com/beck-8/subs-check/releases 自行下载！",
+                        "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
+                using (HttpClient client = new HttpClient())
+                {
+                    try
+                    {
+                        client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 cmliu/SubsCheck-Win-GUI");
+                        client.Timeout = TimeSpan.FromSeconds(30); // 增加超时时间以适应下载需求
+
+                        Log("正在获取最新版本 subs-check.exe 内核下载地址...");
+                        string url = "https://api.github.com/repos/beck-8/subs-check/releases/latest";
+
+                        // 使用异步方法
+                        HttpResponseMessage response = await client.GetAsync(url);
+
+                        if (response.IsSuccessStatusCode)
+                        {
+                            // 异步读取内容
+                            string responseBody = await response.Content.ReadAsStringAsync();
+                            JObject json = JObject.Parse(responseBody);
+                            string latestVersion = json["tag_name"].ToString();
+                            Log($"subs-check.exe 最新版本为: {latestVersion} ");
+                            // 查找Windows i386版本的资源
+                            string downloadUrl = null;
+                            JArray assets = (JArray)json["assets"];
+                            foreach (var asset in assets)
+                            {
+                                if (asset["name"].ToString() == "subs-check_Windows_i386.zip")
+                                {
+                                    downloadUrl = asset["browser_download_url"].ToString();
+                                    break;
+                                }
+                            }
+
+                            if (downloadUrl != null)
+                            {
+                                string executablePath = Path.GetDirectoryName(Application.ExecutablePath);
+                                string zipFilePath = Path.Combine(executablePath, "subs-check_Windows_i386.zip");
+                                // 如果文件已存在，先删除
+                                if (File.Exists(zipFilePath)) File.Delete(zipFilePath);
+
+                                Log($"开始下载 {downloadUrl}");
+
+                                // 重置进度条
+                                progressBar1.Value = 0;
+
+                                // 获取文件大小
+                                HttpResponseMessage sizeResponse = await client.SendAsync(new HttpRequestMessage(HttpMethod.Head, githubProxyURL + downloadUrl));
+                                long totalBytes = sizeResponse.Content.Headers.ContentLength ?? 0;
+
+                                // 创建下载请求
+                                using (var downloadResponse = await client.GetAsync(githubProxyURL + downloadUrl, HttpCompletionOption.ResponseHeadersRead))
+                                using (var contentStream = await downloadResponse.Content.ReadAsStreamAsync())
+                                using (var fileStream = new FileStream(zipFilePath, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true))
+                                {
+                                    byte[] buffer = new byte[8192];
+                                    long totalBytesRead = 0;
+                                    int bytesRead;
+
+                                    while ((bytesRead = await contentStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                                    {
+                                        await fileStream.WriteAsync(buffer, 0, bytesRead);
+
+                                        totalBytesRead += bytesRead;
+
+                                        // 更新进度条
+                                        if (totalBytes > 0)
+                                        {
+                                            int progressPercentage = (int)((totalBytesRead * 100) / totalBytes);
+                                            // 确保进度值在有效范围内 (0-100)
+                                            progressPercentage = Math.Min(100, Math.Max(0, progressPercentage));
+                                            progressBar1.Value = progressPercentage;
+                                        }
+                                    }
+                                }
+
+                                Log("下载完成，正在解压文件...");
+
+                                // 解压文件
+                                using (System.IO.Compression.ZipArchive archive = System.IO.Compression.ZipFile.OpenRead(zipFilePath))
+                                {
+                                    // 查找subs-check.exe
+                                    System.IO.Compression.ZipArchiveEntry exeEntry = archive.Entries.FirstOrDefault(
+                                        entry => entry.Name.Equals("subs-check.exe", StringComparison.OrdinalIgnoreCase));
+
+                                    if (exeEntry != null)
+                                    {
+                                        string exeFilePath = Path.Combine(executablePath, "subs-check.exe");
+
+                                        // 如果文件已存在，先删除
+                                        if (File.Exists(exeFilePath))
+                                        {
+                                            File.Delete(exeFilePath);
+                                        }
+
+                                        // 解压文件
+                                        exeEntry.ExtractToFile(exeFilePath);
+
+                                        Log("subs-check.exe 已成功安装！");
+                                        // 这里保留原有行为，不修改button1.Enabled
+
+                                        // 删除下载的zip文件
+                                        //File.Delete(zipFilePath);
+                                    }
+                                    else
+                                    {
+                                        Log("无法在压缩包中找到 subs-check.exe 文件。", true);
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                Log("无法找到适用于 Windows i386 的下载链接。", true);
+                                MessageBox.Show("未能找到适用的 subs-check.exe 下载链接。\n\n请前往 https://github.com/beck-8/subs-check/releases 自行下载！",
+                                    "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            }
+                        }
+                        else
+                        {
+                            Log($"获取版本信息失败: HTTP {(int)response.StatusCode} {response.ReasonPhrase}", true);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Log($"下载过程中出错: {ex.Message}", true);
+                        MessageBox.Show($"下载 subs-check.exe 时出错: {ex.Message}\n\n请前往 https://github.com/beck-8/subs-check/releases 自行下载！",
+                            "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log($"初始化下载过程出错: {ex.Message}", true);
+                MessageBox.Show($"下载准备过程出错: {ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private async void StartSubsCheckProcess()
         {
             try
             {
@@ -582,10 +801,13 @@ namespace subs_check.win.gui
                 // 检查文件是否存在
                 if (!File.Exists(subsCheckPath))
                 {
-                    richTextBox1.AppendText("错误: 没有找到 subs-check.exe 文件。\r\n");
+                    Log("没有找到 subs-check.exe 文件。", true);
+                    await DownloadSubsCheckEXE(); // 使用异步等待
+                    /*
                     button1.Text = "启动";
                     button1.Enabled = false;
                     return;
+                    */
                 }
 
                 // 创建进程启动信息
@@ -619,11 +841,11 @@ namespace subs_check.win.gui
                 subsCheckProcess.EnableRaisingEvents = true;
                 subsCheckProcess.Exited += SubsCheckProcess_Exited;
 
-                richTextBox1.AppendText("subs-check.exe 已启动...\r\n");
+                Log("subs-check.exe 已启动...");
             }
             catch (Exception ex)
             {
-                richTextBox1.AppendText($"启动 subs-check.exe 时出错: {ex.Message}\r\n");
+                Log($"启动 subs-check.exe 时出错: {ex.Message}", true);
                 button1.Text = "启动";
             }
         }
@@ -637,12 +859,12 @@ namespace subs_check.win.gui
                     // 尝试正常关闭进程
                     subsCheckProcess.Kill();
                     subsCheckProcess.WaitForExit();
-                    richTextBox1.AppendText("subs-check.exe 已停止\r\n");
+                    Log("subs-check.exe 已停止");
                     notifyIcon1.Icon = originalNotifyIcon;
                 }
                 catch (Exception ex)
                 {
-                    richTextBox1.AppendText($"停止 subs-check.exe 时出错: {ex.Message}\r\n");
+                    Log($"停止 subs-check.exe 时出错: {ex.Message}", true);
                 }
                 finally
                 {
@@ -783,7 +1005,7 @@ namespace subs_check.win.gui
             // 进程退出时，在 UI 线程上更新控件
             BeginInvoke(new Action(() =>
             {
-                richTextBox1.AppendText("subs-check.exe 已退出\r\n");
+                Log("subs-check.exe 已退出");
                 button1.Text = "启动";
 
                 // 更新菜单项的启用状态
@@ -1038,6 +1260,17 @@ namespace subs_check.win.gui
                     }
                 }
             }
+        }
+
+        private void Log(string message, bool isError = false)
+        {
+            string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            string logType = isError ? "ERR" : "INF";
+            richTextBox1.AppendText($"{timestamp} {logType} {message}\r\n");
+
+            // 滚动到最底部
+            richTextBox1.SelectionStart = richTextBox1.Text.Length;
+            richTextBox1.ScrollToCaret();
         }
     }
 }

@@ -64,6 +64,8 @@
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.timer2 = new System.Windows.Forms.Timer(this.components);
             this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.textBox10 = new System.Windows.Forms.TextBox();
+            this.label19 = new System.Windows.Forms.Label();
             this.textBox4 = new System.Windows.Forms.TextBox();
             this.label13 = new System.Windows.Forms.Label();
             this.textBox3 = new System.Windows.Forms.TextBox();
@@ -83,8 +85,6 @@
             this.label17 = new System.Windows.Forms.Label();
             this.textBox9 = new System.Windows.Forms.TextBox();
             this.label18 = new System.Windows.Forms.Label();
-            this.textBox10 = new System.Windows.Forms.TextBox();
-            this.label19 = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown6)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown5)).BeginInit();
@@ -400,7 +400,6 @@
             // 
             // button1
             // 
-            this.button1.Enabled = false;
             this.button1.Location = new System.Drawing.Point(7, 396);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(75, 23);
@@ -459,8 +458,9 @@
             // 
             this.comboBox3.FormattingEnabled = true;
             this.comboBox3.Items.AddRange(new object[] {
-            "slink.ltd",
+            "自动选择",
             "ghfast.top",
+            "slink.ltd",
             "ghp.618032.xyz",
             "noad.keliyan.top",
             "github.hostscc.top",
@@ -475,7 +475,7 @@
             this.comboBox3.Name = "comboBox3";
             this.comboBox3.Size = new System.Drawing.Size(120, 20);
             this.comboBox3.TabIndex = 21;
-            this.comboBox3.Text = "slink.ltd";
+            this.comboBox3.Text = "自动选择";
             this.comboBox3.Leave += new System.EventHandler(this.comboBox3_Leave);
             // 
             // label10
@@ -543,6 +543,22 @@
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Gist 上传参数";
             this.groupBox4.Visible = false;
+            // 
+            // textBox10
+            // 
+            this.textBox10.Location = new System.Drawing.Point(439, 18);
+            this.textBox10.Name = "textBox10";
+            this.textBox10.Size = new System.Drawing.Size(100, 21);
+            this.textBox10.TabIndex = 7;
+            // 
+            // label19
+            // 
+            this.label19.AutoSize = true;
+            this.label19.Location = new System.Drawing.Point(359, 21);
+            this.label19.Name = "label19";
+            this.label19.Size = new System.Drawing.Size(83, 12);
+            this.label19.TabIndex = 6;
+            this.label19.Text = "Github Name：";
             // 
             // textBox4
             // 
@@ -723,22 +739,6 @@
             this.label18.Size = new System.Drawing.Size(65, 12);
             this.label18.TabIndex = 0;
             this.label18.Text = "Username：";
-            // 
-            // textBox10
-            // 
-            this.textBox10.Location = new System.Drawing.Point(439, 18);
-            this.textBox10.Name = "textBox10";
-            this.textBox10.Size = new System.Drawing.Size(100, 21);
-            this.textBox10.TabIndex = 7;
-            // 
-            // label19
-            // 
-            this.label19.AutoSize = true;
-            this.label19.Location = new System.Drawing.Point(359, 21);
-            this.label19.Name = "label19";
-            this.label19.Size = new System.Drawing.Size(83, 12);
-            this.label19.TabIndex = 6;
-            this.label19.Text = "Github Name：";
             // 
             // Form1
             // 
