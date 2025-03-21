@@ -434,19 +434,25 @@ namespace subs_check.win.gui
                         // 将此代码添加到"自动选择"部分：
                         if (comboBox3.Text == "自动选择")
                         {
-                            bool proxyFound = false;
-                            // 将尝试结果保存在richTextBox1中
-                            Log("检测可用 GitHub 代理...");
-
-                            // 遍历comboBox3中的所有项目
+                            // 创建不包含"自动选择"的代理列表
+                            List<string> proxyItems = new List<string>();
                             for (int j = 0; j < comboBox3.Items.Count; j++)
                             {
                                 string proxyItem = comboBox3.Items[j].ToString();
+                                if (proxyItem != "自动选择")
+                                    proxyItems.Add(proxyItem);
+                            }
 
-                                // 跳过"自动选择"选项
-                                if (proxyItem == "自动选择")
-                                    continue;
+                            // 随机打乱列表顺序
+                            Random random = new Random();
+                            proxyItems = proxyItems.OrderBy(x => random.Next()).ToList();
 
+                            bool proxyFound = false;
+                            Log("检测可用 GitHub 代理...");
+
+                            // 遍历随机排序后的代理列表
+                            foreach (string proxyItem in proxyItems)
+                            {
                                 string checkUrl = $"https://{proxyItem}/https://raw.githubusercontent.com/cmliu/SubsCheck-Win-GUI/master/packages.config";
                                 Log($"正在测试 GitHub 代理: {proxyItem}");
                                 richTextBox1.Refresh();
@@ -456,8 +462,8 @@ namespace subs_check.win.gui
                                     using (HttpClient client = new HttpClient())
                                     {
                                         client.Timeout = TimeSpan.FromSeconds(5); // 设置5秒超时
-                                                                                  // 添加User-Agent头，避免被拒绝访问
-                                        client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 cmliu/SubsCheck-Win-GUI");
+                                        // 添加User-Agent头，避免被拒绝访问
+                                        client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win32; x86) AppleWebKit/537.36 (KHTML, like Gecko) cmliu/SubsCheck-Win-GUI");
 
                                         HttpResponseMessage response = client.GetAsync(checkUrl).Result;
                                         if (response.IsSuccessStatusCode)
@@ -487,8 +493,7 @@ namespace subs_check.win.gui
                                     MessageBoxButtons.OK,
                                     MessageBoxIcon.Warning);
 
-                                // 如果没有找到可用代理，可以设置一个默认值或保持为"自动选择"
-                                // 这里我们设置为空，让用户手动选择
+                                // 如果没有找到可用代理，设置为空
                                 githubProxyURL = "";
                             }
                         }
@@ -652,7 +657,7 @@ namespace subs_check.win.gui
                 {
                     try
                     {
-                        client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 cmliu/SubsCheck-Win-GUI");
+                        client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win32; x86) AppleWebKit/537.36 (KHTML, like Gecko) cmliu/SubsCheck-Win-GUI");
                         client.Timeout = TimeSpan.FromSeconds(30); // 增加超时时间以适应下载需求
 
                         Log("正在获取最新版本 subs-check.exe 内核下载地址...");
