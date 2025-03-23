@@ -25,7 +25,7 @@ namespace subs_check.win.gui
         private ToolStripMenuItem startMenuItem;
         private ToolStripMenuItem stopMenuItem;
         string githubProxyURL;
-
+        int run = 0;
         public Form1()
         {
             InitializeComponent();
@@ -371,7 +371,7 @@ namespace subs_check.win.gui
             return null;
         }
 
-        private void SaveConfig()//保存配置文件
+        private async Task SaveConfig()//保存配置文件
         {
             try
             {
@@ -423,8 +423,7 @@ namespace subs_check.win.gui
                     if (!string.IsNullOrEmpty(comboBox3.Text))
                     {
                         const string githubRawPrefix = "https://raw.githubusercontent.com/";
-                        githubProxyURL = $"https://{comboBox3.Text}/";
-                        // 将此代码添加到"自动选择"部分：
+
                         if (comboBox3.Text == "自动选择")
                         {
                             // 创建不包含"自动选择"的代理列表
@@ -440,63 +439,21 @@ namespace subs_check.win.gui
                             Random random = new Random();
                             proxyItems = proxyItems.OrderBy(x => random.Next()).ToList();
 
-                            bool proxyFound = false;
-                            Log("检测可用 GitHub 代理...");
-
-                            // 遍历随机排序后的代理列表
-                            foreach (string proxyItem in proxyItems)
-                            {
-                                string checkUrl = $"https://{proxyItem}/https://raw.githubusercontent.com/cmliu/SubsCheck-Win-GUI/master/packages.config";
-                                Log($"正在测试 GitHub 代理: {proxyItem}");
-                                richTextBox1.Refresh();
-
-                                try
-                                {
-                                    using (HttpClient client = new HttpClient())
-                                    {
-                                        client.Timeout = TimeSpan.FromSeconds(5); // 设置5秒超时
-                                        // 添加User-Agent头，避免被拒绝访问
-                                        client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win32; x86) AppleWebKit/537.36 (KHTML, like Gecko) cmliu/SubsCheck-Win-GUI");
-
-                                        HttpResponseMessage response = client.GetAsync(checkUrl).Result;
-                                        if (response.IsSuccessStatusCode)
-                                        {
-                                            // 找到可用代理
-                                            githubProxyURL = $"https://{proxyItem}/";
-                                            Log($"找到可用 GitHub 代理: {proxyItem}");
-                                            proxyFound = true;
-                                            break;
-                                        }
-                                    }
-                                }
-                                catch (Exception ex)
-                                {
-                                    // 记录错误但继续尝试下一个
-                                    Log($"代理 {proxyItem} 测试失败: {ex.Message}", true);
-                                    richTextBox1.Refresh();
-                                }
-                            }
-
-                            // 如果没有找到可用的代理
-                            if (!proxyFound)
-                            {
-                                Log("未找到可用的 GitHub 代理，请在高级设置中手动设置。", true);
-                                MessageBox.Show("未找到可用的 GitHub 代理。\n\n请打开高级设置手动填入一个可用的Github Proxy，或检查您的网络连接。",
-                                    "代理检测失败",
-                                    MessageBoxButtons.OK,
-                                    MessageBoxIcon.Warning);
-
-                                // 如果没有找到可用代理，设置为空
-                                githubProxyURL = "";
-                            }
+                            // 异步检测可用代理
+                            githubProxyURL = await DetectGitHubProxyAsync(proxyItems);
+                        }
+                        else
+                        {
+                            githubProxyURL = $"https://{comboBox3.Text}/";
                         }
 
+                        // 处理URLs
                         for (int i = 0; i < subUrls.Count; i++)
                         {
-                            if (subUrls[i].StartsWith(githubRawPrefix))
+                            if (subUrls[i].StartsWith(githubRawPrefix) && !string.IsNullOrEmpty(githubProxyURL))
                             {
                                 // 替换为代理 URL 格式
-                                subUrls[i] = githubProxyURL  + githubRawPrefix + subUrls[i].Substring(githubRawPrefix.Length);
+                                subUrls[i] = githubProxyURL + githubRawPrefix + subUrls[i].Substring(githubRawPrefix.Length);
                             }
                         }
                     }
@@ -524,8 +481,6 @@ namespace subs_check.win.gui
 
                 // 写入YAML文件
                 File.WriteAllText(configFilePath, yamlContent);
-
-                //MessageBox.Show("配置已成功保存。", "提示",  MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
@@ -549,10 +504,11 @@ namespace subs_check.win.gui
             判断保存类型();
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private async void button1_Click(object sender, EventArgs e)
         {
-            if (button1.Text == "启动")
+            if (button1.Text == "启动") 
             {
+                run = 1;
                 if (button3.Enabled==false || button4.Enabled == false)
                 {
                     string executablePath = System.IO.Path.GetDirectoryName(System.Windows.Forms.Application.ExecutablePath);
@@ -588,22 +544,27 @@ namespace subs_check.win.gui
 
                 // 清空 richTextBox1
                 richTextBox1.Clear();
-                SaveConfig();
+                await SaveConfig();
 
-                // 更新菜单项的启用状态
-                startMenuItem.Enabled = false;
-                stopMenuItem.Enabled = true;
+                if (run == 1) 
+                {
+                    // 更新菜单项的启用状态
+                    startMenuItem.Enabled = false;
+                    stopMenuItem.Enabled = true;
 
-                // 清空 richTextBox1
-                //richTextBox1.Clear();
+                    // 清空 richTextBox1
+                    //richTextBox1.Clear();
 
-                notifyIcon1.Text = "SubsCheck: 已就绪";
+                    notifyIcon1.Text = "SubsCheck: 已就绪";
 
-                // 启动 subs-check.exe 程序
-                StartSubsCheckProcess();
+                    // 启动 subs-check.exe 程序
+                    StartSubsCheckProcess();
+                }
             }
             else
             {
+                run = 0;
+                Log("任务停止");
                 progressBar1.Value = 0;
                 groupBox2.Text = "实时日志";
                 notifyIcon1.Text = "SubsCheck: 未运行";
@@ -633,6 +594,8 @@ namespace subs_check.win.gui
 
         private async Task DownloadSubsCheckEXE()
         {
+            button1.Enabled = false;
+
             try
             {
                 Log("正在检查网络连接...");
@@ -742,7 +705,7 @@ namespace subs_check.win.gui
                                         // 解压文件
                                         exeEntry.ExtractToFile(exeFilePath);
 
-                                        Log("subs-check.exe 已成功安装！");
+                                        Log("subs-check.exe 已就绪！");
                                         // 这里保留原有行为，不修改button1.Enabled
 
                                         // 删除下载的zip文件
@@ -779,6 +742,8 @@ namespace subs_check.win.gui
                 Log($"初始化下载过程出错: {ex.Message}", true);
                 MessageBox.Show($"下载准备过程出错: {ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+
+            button1.Enabled = true;
         }
 
         private async void StartSubsCheckProcess()
@@ -792,20 +757,47 @@ namespace subs_check.win.gui
                 {
                     notifyIcon1.Icon = new Icon(ms);
                 }
+
                 // 获取当前应用程序目录
                 string executablePath = Path.GetDirectoryName(System.Windows.Forms.Application.ExecutablePath);
                 string subsCheckPath = Path.Combine(executablePath, "subs-check.exe");
+
+                // 检查是否有其他subs-check.exe进程正在运行，并强制结束它们
+                try
+                {
+                    Process[] processes = Process.GetProcessesByName("subs-check");
+                    if (processes.Length > 0)
+                    {
+                        Log("发现正在运行的subs-check.exe进程，正在强制结束...");
+                        foreach (Process process in processes)
+                        {
+                            // 确保不是当前应用程序的进程
+                            if (process != subsCheckProcess)
+                            {
+                                try
+                                {
+                                    process.Kill();
+                                    process.WaitForExit();
+                                    Log($"成功结束subs-check.exe进程(ID: {process.Id})");
+                                }
+                                catch (Exception ex)
+                                {
+                                    Log($"结束subs-check.exe进程时出错(ID: {process.Id}): {ex.Message}", true);
+                                }
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log($"检查运行中的subs-check.exe进程时出错: {ex.Message}", true);
+                }
 
                 // 检查文件是否存在
                 if (!File.Exists(subsCheckPath))
                 {
                     Log("没有找到 subs-check.exe 文件。", true);
                     await DownloadSubsCheckEXE(); // 使用异步等待
-                    /*
-                    button1.Text = "启动";
-                    button1.Enabled = false;
-                    return;
-                    */
                 }
 
                 // 创建进程启动信息
@@ -847,6 +839,7 @@ namespace subs_check.win.gui
                 button1.Text = "启动";
             }
         }
+
 
         private void StopSubsCheckProcess()
         {
@@ -1280,5 +1273,173 @@ namespace subs_check.win.gui
                 }
             }
         }
+
+        // 创建专用方法用于异步检测GitHub代理
+        private async Task<string> DetectGitHubProxyAsync(List<string> proxyItems)
+        {
+            bool proxyFound = false;
+            string detectedProxyURL = "";
+
+            Log("检测可用 GitHub 代理...");
+
+            // 遍历随机排序后的代理列表
+            foreach (string proxyItem in proxyItems)
+            {
+                string checkUrl = $"https://{proxyItem}/https://raw.githubusercontent.com/cmliu/SubsCheck-Win-GUI/master/packages.config";
+                Log($"正在测试 GitHub 代理: {proxyItem}");
+                richTextBox1.Refresh();
+
+                try
+                {
+                    using (HttpClient client = new HttpClient())
+                    {
+                        client.Timeout = TimeSpan.FromSeconds(5); // 设置5秒超时
+                                                                  // 添加User-Agent头，避免被拒绝访问
+                        client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win32; x86) AppleWebKit/537.36 (KHTML, like Gecko) cmliu/SubsCheck-Win-GUI");
+
+                        // 使用异步方式
+                        HttpResponseMessage response = await client.GetAsync(checkUrl);
+                        if (response.IsSuccessStatusCode)
+                        {
+                            // 找到可用代理
+                            detectedProxyURL = $"https://{proxyItem}/";
+                            Log($"找到可用 GitHub 代理: {proxyItem}");
+                            proxyFound = true;
+                            break;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // 记录错误但继续尝试下一个
+                    Log($"代理 {proxyItem} 测试失败: {ex.Message}", true);
+                    richTextBox1.Refresh();
+                }
+            }
+
+            // 如果没有找到可用的代理
+            if (!proxyFound)
+            {
+                Log("未找到可用的 GitHub 代理，请在高级设置中手动设置。", true);
+                MessageBox.Show("未找到可用的 GitHub 代理。\n\n请打开高级设置手动填入一个可用的Github Proxy，或检查您的网络连接。",
+                    "代理检测失败",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+            }
+
+            return detectedProxyURL;
+        }
+
+        private async void button5_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                button5.Enabled = false;
+                button1.Enabled = false;
+                // 清空日志
+                richTextBox1.Clear();
+                Log("开始检查和下载最新版本的 subs-check.exe...");
+
+                // 获取当前应用程序目录
+                string executablePath = Path.GetDirectoryName(System.Windows.Forms.Application.ExecutablePath);
+                string subsCheckPath = Path.Combine(executablePath, "subs-check.exe");
+
+                // 检查文件是否存在
+                if (File.Exists(subsCheckPath))
+                {
+                    Log($"发现 subs-check.exe，正在删除...");
+
+                    try
+                    {
+                        // 首先检查是否有进程正在运行
+                        Process[] processes = Process.GetProcessesByName("subs-check");
+                        if (processes.Length > 0)
+                        {
+                            Log("发现正在运行的 subs-check.exe 进程，正在强制结束...");
+                            foreach (Process process in processes)
+                            {
+                                try
+                                {
+                                    process.Kill();
+                                    process.WaitForExit();
+                                    Log($"成功结束 subs-check.exe 进程(ID: {process.Id})");
+                                }
+                                catch (Exception ex)
+                                {
+                                    Log($"结束进程时出错(ID: {process.Id}): {ex.Message}", true);
+                                }
+                            }
+                        }
+
+                        // 删除文件
+                        File.Delete(subsCheckPath);
+                        Log("成功删除旧版本 subs-check.exe");
+                    }
+                    catch (Exception ex)
+                    {
+                        Log($"删除 subs-check.exe 时出错: {ex.Message}", true);
+                        MessageBox.Show($"无法删除现有的 subs-check.exe 文件: {ex.Message}\n\n请手动删除后重试，或者检查文件是否被其他程序占用。", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        button5.Enabled = true;
+                        return;
+                    }
+                }
+                else
+                {
+                    Log("未找到现有的 subs-check.exe 文件，将直接下载最新版本");
+                }
+
+                // 检测可用的 GitHub 代理
+                if (!string.IsNullOrEmpty(comboBox3.Text) && comboBox3.Text == "自动选择")
+                {
+                    // 创建不包含"自动选择"的代理列表
+                    List<string> proxyItems = new List<string>();
+                    for (int j = 0; j < comboBox3.Items.Count; j++)
+                    {
+                        string proxyItem = comboBox3.Items[j].ToString();
+                        if (proxyItem != "自动选择")
+                            proxyItems.Add(proxyItem);
+                    }
+
+                    // 随机打乱列表顺序
+                    Random random = new Random();
+                    proxyItems = proxyItems.OrderBy(x => random.Next()).ToList();
+
+                    // 异步检测可用代理
+                    githubProxyURL = await DetectGitHubProxyAsync(proxyItems);
+
+                    // 如果未能找到可用代理，提示用户
+                    if (string.IsNullOrEmpty(githubProxyURL))
+                    {
+                        Log("未能找到可用的 GitHub 代理，下载可能会失败", true);
+                    }
+                }
+                else if (!string.IsNullOrEmpty(comboBox3.Text))
+                {
+                    githubProxyURL = $"https://{comboBox3.Text}/";
+                    Log($"使用指定的 GitHub 代理: {comboBox3.Text}");
+                }
+                else
+                {
+                    Log("未设置 GitHub 代理，将尝试直接下载", true);
+                }
+
+                // 下载最新版本的 subs-check.exe
+                await DownloadSubsCheckEXE();
+
+                // 完成
+                Log("内核更新完成！");
+            }
+            catch (Exception ex)
+            {
+                Log($"操作过程中出错: {ex.Message}", true);
+                MessageBox.Show($"处理过程中出现错误: {ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                button5.Enabled = true;
+                button1.Enabled = true;
+            }
+        }
+
     }
 }
