@@ -31,9 +31,6 @@ namespace subs_check.win.gui
             InitializeComponent();
             originalNotifyIcon = notifyIcon1.Icon;
 
-            // 注册窗体大小改变事件
-            this.Resize += new EventHandler(Form1_Resize);
-
             toolTip1.SetToolTip(numericUpDown1, "并发线程数：推荐 宽带峰值/50M。");
             toolTip1.SetToolTip(numericUpDown2, "检查间隔时间(分钟)：放置后台的时候，下次自动测速的间隔时间。");
             toolTip1.SetToolTip(numericUpDown3, "超时时间(毫秒)：节点的最大延迟。");
@@ -121,19 +118,15 @@ namespace subs_check.win.gui
             notifyIcon1.Visible = true;
         }
 
-        // 确保在窗体关闭时清理资源
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
-            // 如果程序正在运行，先停止它
-            if (subsCheckProcess != null && !subsCheckProcess.HasExited)
+            if (e.CloseReason == CloseReason.UserClosing)
             {
-                StopSubsCheckProcess();
+                // 取消关闭操作
+                e.Cancel = true;
+                // 调用隐藏窗口方法
+                隐藏窗口();
             }
-
-            // 确保通知图标被移除
-            notifyIcon1.Visible = false;
-
-            base.OnFormClosing(e);
         }
 
         private async void timer1_Tick(object sender, EventArgs e)//初始化
@@ -1119,38 +1112,6 @@ namespace subs_check.win.gui
             button4.Text = "Clash订阅";
         }
 
-        private void Form1_Resize(object sender, EventArgs e)
-        {
-            // 当窗口被最小化时
-            if (this.WindowState == FormWindowState.Minimized)
-            {
-                // 隐藏窗体（从任务栏消失）
-                this.Hide();
-
-                // 确保通知图标可见
-                notifyIcon1.Visible = true;
-
-                // 可选：显示气泡提示
-                notifyIcon1.ShowBalloonTip(1000, "SubsCheck", "程序已最小化到系统托盘", ToolTipIcon.Info);
-            }
-        }
-
-        private void notifyIcon1_MouseDoubleClick(object sender, MouseEventArgs e)
-        {
-            // 只处理鼠标左键双击
-            if (e.Button == MouseButtons.Left)
-            {
-                // 显示窗体
-                this.Show();
-
-                // 恢复窗口状态
-                this.WindowState = FormWindowState.Normal;
-
-                // 激活窗口（使其获得焦点）
-                this.Activate();
-            }
-        }
-
         private void comboBox3_Leave(object sender, EventArgs e)
         {
             // 检查是否有内容
@@ -1276,6 +1237,48 @@ namespace subs_check.win.gui
             // 滚动到最底部
             richTextBox1.SelectionStart = richTextBox1.Text.Length;
             richTextBox1.ScrollToCaret();
+        }
+
+        private void 恢复窗口()
+        {
+            // 显示窗体
+            this.Show();
+
+            // 恢复窗口状态
+            this.WindowState = FormWindowState.Normal;
+
+            // 激活窗口（使其获得焦点）
+            this.Activate();
+        }
+
+        private void 隐藏窗口()
+        {
+            // 隐藏窗体（从任务栏消失）
+            this.Hide();
+
+            // 确保通知图标可见
+            notifyIcon1.Visible = true;
+
+            // 可选：显示气泡提示
+            notifyIcon1.ShowBalloonTip(1000, "SubsCheck", "程序已最小化到系统托盘", ToolTipIcon.Info);
+        }
+
+        private void notifyIcon1_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                // 检查窗口是否可见
+                if (this.Visible)
+                {
+                    // 如果窗口当前可见，则隐藏窗口
+                    隐藏窗口();
+                }
+                else
+                {
+                    // 如果窗口当前不可见，则恢复窗口
+                    恢复窗口();
+                }
+            }
         }
     }
 }
