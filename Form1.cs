@@ -40,7 +40,7 @@ namespace subs_check.win.gui
             toolTip1.SetToolTip(numericUpDown4, "最低测速结果舍弃(KB/s)。");
             toolTip1.SetToolTip(numericUpDown5, "下载测试时间(s)：与下载链接大小相关，默认最大测试10s。");
             toolTip1.SetToolTip(numericUpDown6, "本地监听端口：用于直接返回节点信息，方便订阅。");
-            toolTip1.SetToolTip(textBox1, "节点池订阅地址：支持 base64/clash 格式的订阅链接。");
+            toolTip1.SetToolTip(textBox1, "节点池订阅地址：支持 Link、Base64、Clash 格式的订阅链接。");
             toolTip1.SetToolTip(checkBox1, "以节点IP查询位置重命名节点。\n质量差的节点可能造成IP查询失败，造成整体检查速度稍微变慢。");
             toolTip1.SetToolTip(comboBox3, "GitHub 代理：代理订阅 GitHub raw 节点池。");
             toolTip1.SetToolTip(comboBox2, "测速地址：注意 并发数*节点速度<最大网速 否则测速结果不准确\n尽量不要使用Speedtest，Cloudflare提供的下载链接，因为很多节点屏蔽测速网站。");
