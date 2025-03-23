@@ -294,7 +294,7 @@
             this.numericUpDown2.Size = new System.Drawing.Size(58, 21);
             this.numericUpDown2.TabIndex = 11;
             this.numericUpDown2.Value = new decimal(new int[] {
-            300,
+            120,
             0,
             0,
             0});
@@ -311,7 +311,7 @@
             this.numericUpDown1.Size = new System.Drawing.Size(58, 21);
             this.numericUpDown1.TabIndex = 10;
             this.numericUpDown1.Value = new decimal(new int[] {
-            16,
+            32,
             0,
             0,
             0});
@@ -795,7 +795,6 @@
                 "Waifu2x-Extension-GUI-v2.21.12-Portable.7z",
             "https://github.com/2dust/v2rayN/releases/download/7.10.4/v2rayN-windows-64-deskto" +
                 "p.zip",
-            "https://speed.cloudflare.com/__down?bytes=52428800",
             "https://github.com/VSCodium/vscodium/releases/download/1.98.0.25067/codium-1.98.0" +
                 ".25067-el9.aarch64.rpm"});
             this.comboBox2.Location = new System.Drawing.Point(394, 18);
