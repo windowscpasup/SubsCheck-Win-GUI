@@ -50,8 +50,12 @@ YamlDotNet.dll              # yaml读写组件
 YamlDotNet.xml              # yaml读写组件
 ```
 
-## Star 星星走起
+## ⭐ Star 星星走起
 [![Stargazers over time](https://starchart.cc/cmliu/SubsCheck-Win-GUI.svg?variant=adaptive)](https://starchart.cc/cmliu/SubsCheck-Win-GUI)
+
+## 💻 已适配客户端
+   - [v2rayN](https://github.com/2dust/v2rayN)
+   - [mihomo-party](https://github.com/mihomo-party-org/mihomo-party)，[FlClash](https://github.com/chen08209/FlClash)，[clash-verge-rev](https://github.com/clash-verge-rev/clash-verge-rev)，[Clash Nyanpasu](https://github.com/keiko233/clash-nyanpasu)
 
 # 🙏 致谢
 [beck-8](https://github.com/beck-8/subs-check)、[bestruirui](https://github.com/bestruirui/BestSub)、[Sub-Store](https://github.com/sub-store-org/Sub-Store)、GPT
