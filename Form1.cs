@@ -559,7 +559,7 @@ namespace subs_check.win.gui
                 numericUpDown6.Enabled = false;
                 numericUpDown7.Enabled = false;
                 comboBox1.Enabled = false;
-                textBox1.ReadOnly = true;
+                textBox1.Enabled = false;
                 groupBox3.Enabled = false;
                 groupBox4.Enabled = false;
                 groupBox5.Enabled = false;
@@ -593,10 +593,10 @@ namespace subs_check.win.gui
                 progressBar1.Value = 0;
                 groupBox2.Text = "实时日志";
                 notifyIcon1.Text = "SubsCheck: 未运行";
-                // 结束 Sub-Store
-                await KillNodeProcessAsync();
                 // 停止 subs-check.exe 程序
                 StopSubsCheckProcess();
+                // 结束 Sub-Store
+                await KillNodeProcessAsync();
                 button3.Enabled = false;
                 numericUpDown1.Enabled = true;
                 numericUpDown2.Enabled = true;
@@ -606,7 +606,7 @@ namespace subs_check.win.gui
                 numericUpDown6.Enabled = true;
                 numericUpDown7.Enabled = true;
                 comboBox1.Enabled = true;
-                textBox1.ReadOnly = false;
+                textBox1.Enabled = true;
                 groupBox3.Enabled = true;
                 groupBox4.Enabled = true;
                 groupBox5.Enabled = true;
@@ -1029,7 +1029,7 @@ namespace subs_check.win.gui
                 numericUpDown4.Enabled = true;
                 numericUpDown5.Enabled = true;
                 numericUpDown6.Enabled = true;
-                textBox1.ReadOnly = false;
+                textBox1.Enabled = true;
                 groupBox3.Enabled = true;
             }));
         }
@@ -1501,8 +1501,42 @@ namespace subs_check.win.gui
             }
         }
 
+        private void textBox1_DoubleClick(object sender, EventArgs e)
+        {
+            if (textBox1.Enabled)
+            {
+                // 创建EditURLs窗口的实例
+                EditURLs editURLsForm = new EditURLs();
 
+                // 传递当前textBox1的内容到EditURLs窗口
+                editURLsForm.UrlContent = textBox1.Text + "\n";
+                editURLsForm.githubProxys = comboBox3.Items;
+                editURLsForm.githubProxy = comboBox3.Text;
+                // 显示对话框并等待结果
+                DialogResult result = editURLsForm.ShowDialog();
 
+                // 如果用户点击了"保存并关闭"按钮（返回DialogResult.OK）
+                if (result == DialogResult.OK)
+                {
+                    // 获取编辑后的内容，按行拆分，过滤空行
+                    string[] lines = editURLsForm.UrlContent.Split(
+                        new[] { "\r\n", "\r", "\n" },
+                        StringSplitOptions.RemoveEmptyEntries);
 
+                    // 去除每行首尾的空白字符
+                    for (int i = 0; i < lines.Length; i++)
+                    {
+                        lines[i] = lines[i].Trim();
+                    }
+
+                    // 再次过滤掉空行
+                    lines = lines.Where(line => !string.IsNullOrWhiteSpace(line)).ToArray();
+
+                    // 将处理后的内容更新到Form1的textBox1
+                    textBox1.Text = string.Join(Environment.NewLine, lines);
+                }
+            }
+
+        }
     }
 }
