@@ -5,6 +5,7 @@ using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Net.Http;
 using System.Net.NetworkInformation;
@@ -35,7 +36,8 @@ namespace subs_check.win.gui
             toolTip1.SetToolTip(numericUpDown3, "超时时间(毫秒)：节点的最大延迟。");
             toolTip1.SetToolTip(numericUpDown4, "最低测速结果舍弃(KB/s)。");
             toolTip1.SetToolTip(numericUpDown5, "下载测试时间(s)：与下载链接大小相关，默认最大测试10s。");
-            toolTip1.SetToolTip(numericUpDown6, "本地监听端口：用于直接返回节点信息，方便订阅。");
+            toolTip1.SetToolTip(numericUpDown6, "本地监听端口：用于直接返回测速结果的节点信息，方便订阅转换。\n注意：除非你知道你在干什么，否则不要将你的本地订阅端口暴露到公网，否则可能会被滥用");
+            toolTip1.SetToolTip(numericUpDown7, "Sub-Store监听端口：用于订阅订阅转换。\n注意：除非你知道你在干什么，否则不要将你的 Sub-Store 暴露到公网，否则可能会被滥用");
             toolTip1.SetToolTip(textBox1, "节点池订阅地址：支持 Link、Base64、Clash 格式的订阅链接。");
             toolTip1.SetToolTip(checkBox1, "以节点IP查询位置重命名节点。\n质量差的节点可能造成IP查询失败，造成整体检查速度稍微变慢。");
             toolTip1.SetToolTip(comboBox3, "GitHub 代理：代理订阅 GitHub raw 节点池。");
@@ -45,7 +47,9 @@ namespace subs_check.win.gui
             toolTip1.SetToolTip(comboBox1, "测速结果的保存方法。");
             toolTip1.SetToolTip(textBox2, "Gist ID：注意！非Github用户名！");
             toolTip1.SetToolTip(textBox3, "Github TOKEN");
-            toolTip1.SetToolTip(textBox10, "Github用户名：无实际作用，只是方便生成订阅链接");
+            
+            toolTip1.SetToolTip(comboBox4, "通用订阅：内置了Sub-Store程序，自适应订阅格式。\nClash订阅：带规则的 Mihomo、Clash 订阅格式。");
+            toolTip1.SetToolTip(comboBox5, "生成带规则的 Clash 订阅所需的覆写规则文件");
             // 设置通知图标的上下文菜单
             SetupNotifyIconContextMenu();
         }
@@ -78,13 +82,14 @@ namespace subs_check.win.gui
 
             // 创建"退出"菜单项
             ToolStripMenuItem exitMenuItem = new ToolStripMenuItem("退出");
-            exitMenuItem.Click += (sender, e) =>
+            exitMenuItem.Click += async (sender, e) =>
             {
                 try
                 {
                     // 如果程序正在运行，先停止它
                     if (subsCheckProcess != null && !subsCheckProcess.HasExited)
                     {
+                        await KillNodeProcessAsync();
                         StopSubsCheckProcess();
                     }
 
@@ -157,6 +162,7 @@ namespace subs_check.win.gui
             标题 = "SubsCheck Win GUI " + 版本号;
             this.Text = 标题 + " TG:CMLiussss BY:CM喂饭 干货满满";
             comboBox1.Text = "本地";
+            comboBox4.Text = "通用订阅";
             ReadConfig();
             /*
             string subsCheckPath = Path.Combine(executablePath, "subs-check.exe");
@@ -279,26 +285,52 @@ namespace subs_check.win.gui
                         numericUpDown6.Value = decimal.Parse(listenport);
                     }
 
+                    int? substoreport = 读取config整数(config, "sub-store-port");
+                    if (substoreport.HasValue) numericUpDown7.Value = substoreport.Value;
+
                     string githubproxy = 读取config字符串(config, "githubproxy");
                     if (githubproxy != null) comboBox3.Text = githubproxy;
 
+                    const string githubRawPrefix = "https://raw.githubusercontent.com/";
+
+                    string mihomoOverwriteUrl = 读取config字符串(config, "mihomo-overwrite-url");
+                    int mihomoOverwriteUrlIndex = mihomoOverwriteUrl.IndexOf(githubRawPrefix);
+                    if (mihomoOverwriteUrl != null) 
+                    {
+                        if (mihomoOverwriteUrlIndex > 0) comboBox5.Text = mihomoOverwriteUrl.Substring(mihomoOverwriteUrlIndex);
+                        else comboBox5.Text = mihomoOverwriteUrl;
+                    } 
+
+                    // 处理URLs，检查是否包含GitHub raw链接
                     List<string> subUrls = 读取config列表(config, "sub-urls");
                     if (subUrls != null && subUrls.Count > 0)
                     {
-                        // 处理URLs，检查是否包含GitHub raw链接
-                        const string githubRawPrefix = "https://raw.githubusercontent.com/";
+                        // 创建一个新的过滤后的列表
+                        var filteredUrls = new List<string>();
+
                         for (int i = 0; i < subUrls.Count; i++)
                         {
-                            int index = subUrls[i].IndexOf(githubRawPrefix);
-                            if (index > 0) // 如果找到且不在字符串开头
+                            // 排除本地URL
+                            string localUrlPattern = $"http://127.0.0.1:{numericUpDown6.Value}/all.yaml";
+                            if (!subUrls[i].Equals(localUrlPattern, StringComparison.OrdinalIgnoreCase))
                             {
-                                // 只保留从githubRawPrefix开始的部分
-                                subUrls[i] = subUrls[i].Substring(index);
+                                // 处理GitHub raw链接
+                                int index = subUrls[i].IndexOf(githubRawPrefix);
+                                if (index > 0) // 如果找到且不在字符串开头
+                                {
+                                    // 只保留从githubRawPrefix开始的部分
+                                    filteredUrls.Add(subUrls[i].Substring(index));
+                                }
+                                else
+                                {
+                                    // 如果不是GitHub链接，直接添加
+                                    filteredUrls.Add(subUrls[i]);
+                                }
                             }
                         }
 
-                        // 将列表中的每个URL放在单独的行上
-                        textBox1.Text = string.Join(Environment.NewLine, subUrls);
+                        // 将过滤后的列表中的每个URL放在单独的行上
+                        textBox1.Text = string.Join(Environment.NewLine, filteredUrls);
                     }
 
                     string renamenode = 读取config字符串(config, "rename-node");
@@ -309,8 +341,7 @@ namespace subs_check.win.gui
                     if (githubgistid != null) textBox2.Text = githubgistid;
                     string githubtoken = 读取config字符串(config, "github-token");
                     if (githubtoken != null) textBox3.Text = githubtoken;
-                    string githubname = 读取config字符串(config, "github-name");
-                    if (githubname != null) textBox10.Text = githubname;
+
                     string githubapimirror = 读取config字符串(config, "github-api-mirror");
                     if (githubapimirror != null) textBox4.Text = githubapimirror;
 
@@ -395,7 +426,7 @@ namespace subs_check.win.gui
                 // 保存gist参数
                 config["github-gist-id"] = textBox2.Text;
                 config["github-token"] = textBox3.Text;
-                config["github-name"] = textBox10.Text;
+
                 config["github-api-mirror"] = textBox4.Text;
 
                 // 保存r2参数
@@ -409,6 +440,8 @@ namespace subs_check.win.gui
 
                 // 保存listen-port
                 config["listen-port"] = $@":{numericUpDown6.Value}";
+                // 保存sub-store-port
+                config["sub-store-port"] = numericUpDown7.Value;
 
                 // 保存githubproxy
                 if (!string.IsNullOrEmpty(comboBox3.Text)) config["githubproxy"] = comboBox3.Text;
@@ -456,13 +489,16 @@ namespace subs_check.win.gui
                             }
                         }
                     }
+                    string allyamlFilePath = System.IO.Path.Combine(executablePath, "output", "all.yaml");
+                    if (System.IO.File.Exists(allyamlFilePath)) subUrls.Add($"http://127.0.0.1:{numericUpDown6.Value}/all.yaml");
 
-                    if (subUrls.Count > 0)
-                        config["sub-urls"] = subUrls;
+                    if (subUrls.Count > 0) config["sub-urls"] = subUrls;
                 }
 
+                config["mihomo-overwrite-url"] = githubProxyURL + comboBox5.Text;//Clash订阅 覆写配置文件
+
                 config["rename-node"] = checkBox1.Checked;//以节点IP查询位置重命名节点
-                config["keep-success-proxies"] = true;//保留之前测试成功的节点
+                config["keep-success-proxies"] = false;
                 config["print-progress"] = true;//是否显示进度
                 config["sub-urls-retry"] = 3;//重试次数(获取订阅失败后重试次数)
 
@@ -508,23 +544,11 @@ namespace subs_check.win.gui
             if (button1.Text == "启动") 
             {
                 run = 1;
-                if (button3.Enabled==false || button4.Enabled == false)
+                if (button3.Enabled==false)
                 {
-                    string executablePath = System.IO.Path.GetDirectoryName(System.Windows.Forms.Application.ExecutablePath);
-                    string outputFolderPath = System.IO.Path.Combine(executablePath, "output");
-                    if (System.IO.Directory.Exists(outputFolderPath))
-                    {
-                        string alltxtFilePath = System.IO.Path.Combine(outputFolderPath, "all.txt");
-                        if (System.IO.File.Exists(alltxtFilePath))
-                        {
-                            button3.Enabled = true;
-                        }
-                        string allyamlFilePath = System.IO.Path.Combine(outputFolderPath, "all.yaml");
-                        if (System.IO.File.Exists(allyamlFilePath))
-                        {
-                            button4.Enabled = true;
-                        }
-                    }
+                    string executablePath = Path.GetDirectoryName(Application.ExecutablePath);
+                    string allyamlFilePath = Path.Combine(executablePath, "output", "all.yaml");
+                    button3.Enabled = File.Exists(allyamlFilePath);
                 }
 
                 numericUpDown1.Enabled = false;
@@ -533,6 +557,7 @@ namespace subs_check.win.gui
                 numericUpDown4.Enabled = false;
                 numericUpDown5.Enabled = false;
                 numericUpDown6.Enabled = false;
+                numericUpDown7.Enabled = false;
                 comboBox1.Enabled = false;
                 textBox1.ReadOnly = true;
                 groupBox3.Enabled = false;
@@ -543,6 +568,7 @@ namespace subs_check.win.gui
 
                 // 清空 richTextBox1
                 richTextBox1.Clear();
+                await KillNodeProcessAsync();
                 await SaveConfig();
 
                 if (run == 1) 
@@ -567,16 +593,18 @@ namespace subs_check.win.gui
                 progressBar1.Value = 0;
                 groupBox2.Text = "实时日志";
                 notifyIcon1.Text = "SubsCheck: 未运行";
+                // 结束 Sub-Store
+                await KillNodeProcessAsync();
                 // 停止 subs-check.exe 程序
                 StopSubsCheckProcess();
                 button3.Enabled = false;
-                button4.Enabled = false;
                 numericUpDown1.Enabled = true;
                 numericUpDown2.Enabled = true;
                 numericUpDown3.Enabled = true;
                 numericUpDown4.Enabled = true;
                 numericUpDown5.Enabled = true;
                 numericUpDown6.Enabled = true;
+                numericUpDown7.Enabled = true;
                 comboBox1.Enabled = true;
                 textBox1.ReadOnly = false;
                 groupBox3.Enabled = true;
@@ -879,22 +907,14 @@ namespace subs_check.win.gui
                     // 检查是否包含"下次检查时间"信息
                     if (cleanText.Contains("下次检查时间:"))
                     {
-                        if (button3.Enabled == false || button4.Enabled == false)
+                        if (button3.Enabled == false)
                         {
                             string executablePath = System.IO.Path.GetDirectoryName(System.Windows.Forms.Application.ExecutablePath);
                             string outputFolderPath = System.IO.Path.Combine(executablePath, "output");
                             if (System.IO.Directory.Exists(outputFolderPath))
                             {
-                                string alltxtFilePath = System.IO.Path.Combine(outputFolderPath, "all.txt");
-                                if (System.IO.File.Exists(alltxtFilePath))
-                                {
-                                    button3.Enabled = true;
-                                }
                                 string allyamlFilePath = System.IO.Path.Combine(outputFolderPath, "all.yaml");
-                                if (System.IO.File.Exists(allyamlFilePath))
-                                {
-                                    button4.Enabled = true;
-                                }
+                                if (System.IO.File.Exists(allyamlFilePath)) button3.Enabled = true;
                             }
                         }
                         // 提取完整的下次检查时间信息
@@ -1019,74 +1039,11 @@ namespace subs_check.win.gui
             try
             {
                 // 构造URL
-                string url = $"http://127.0.0.1:{numericUpDown6.Value}/all.txt";
-                if(comboBox1.Text== "gist")
-                {
-                    if (textBox10.Text != null && textBox10.Text != "")
-                    {
-                        url = $"https://gist.githubusercontent.com/{textBox10.Text}/{textBox2.Text}/raw/all.txt";
-                    }
-                    else
-                    {
-                        // 弹出提示框，提示github name为空
-                        MessageBox.Show("GitHub 用户名为空，无法获取 Gist 订阅链接！",
-                                       "提示",
-                                       MessageBoxButtons.OK,
-                                       MessageBoxIcon.Warning);
-                        return; // 提前返回，不复制空链接
-                    }
-                } 
-                else if(comboBox1.Text == "r2")
-                {
-                    url = $"{textBox7.Text}/storage?key=all.txt&token={textBox6.Text}";
-                }
-                // 将URL复制到剪贴板
-                Clipboard.SetText(url);
-                button4.Text = "Clash订阅";
-                button3.Text = "复制成功";
-                timer2.Enabled = false;
-                timer2.Enabled = true;
-                // 可选：显示提示消息
-                //MessageBox.Show($"URL已复制到剪贴板：\n{url}", "复制成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"复制到剪贴板时出错：{ex.Message}", "错误",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
+                string url = comboBox4.Text == "Clash" ? $"http://127.0.0.1:{numericUpDown7.Value}/api/file/mihomo" : $"http://127.0.0.1:{numericUpDown7.Value}/download/sub";
 
-        private void button4_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                // 构造URL
-                string url = $"http://127.0.0.1:{numericUpDown6.Value}/all.yaml";
-                if (comboBox1.Text == "gist")
-                {
-                    if (textBox10.Text != null && textBox10.Text != "")
-                    {
-                        url = $"https://gist.githubusercontent.com/{textBox10.Text}/{textBox2.Text}/raw/all.yaml";
-                    }
-                    else
-                    {
-                        // 弹出提示框，提示github name为空
-                        MessageBox.Show("GitHub 用户名为空，无法获取 Gist 订阅链接！",
-                                       "提示",
-                                       MessageBoxButtons.OK,
-                                       MessageBoxIcon.Warning);
-                        return; // 提前返回，不复制空链接
-                    }
-                }
-                else if (comboBox1.Text == "r2")
-                {
-                    url = $"{textBox7.Text}/storage?key=all.yaml&token={textBox6.Text}";
-                }
                 // 将URL复制到剪贴板
                 Clipboard.SetText(url);
-                button3.Text = "Base64订阅";
-                button4.Text = "复制成功";
-                timer2.Enabled = false;
+                button3.Text = "复制成功";
                 timer2.Enabled = true;
                 // 可选：显示提示消息
                 //MessageBox.Show($"URL已复制到剪贴板：\n{url}", "复制成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -1100,8 +1057,7 @@ namespace subs_check.win.gui
 
         private void timer2_Tick(object sender, EventArgs e)
         {
-            button3.Text = "Base64订阅";
-            button4.Text = "Clash订阅";
+            button3.Text = "复制订阅";
         }
 
         private void comboBox3_Leave(object sender, EventArgs e)
@@ -1439,6 +1395,114 @@ namespace subs_check.win.gui
                 button1.Enabled = true;
             }
         }
+
+        private decimal 订阅端口;
+        private decimal SubStore端口;
+        private void numericUpDown6_ValueChanged(object sender, EventArgs e)
+        {
+            // 检查numericUpDown7是否存在并且与numericUpDown6的值相等
+            if (numericUpDown6.Value == numericUpDown7.Value)
+            {
+                // 显示警告消息
+                MessageBox.Show("订阅端口 和 Sub-Store端口 不能相同！",
+                               "端口冲突",
+                               MessageBoxButtons.OK,
+                               MessageBoxIcon.Warning);
+
+                // 将numericUpDown6的值恢复为更改前的值
+                numericUpDown6.Value = 订阅端口;
+                numericUpDown7.Value = SubStore端口;
+            }
+            else
+            {
+                // 保存当前值作为下次比较的基准
+                订阅端口 = numericUpDown6.Value;
+                SubStore端口 = numericUpDown7.Value;
+            }
+        }
+
+        /// <summary>
+        /// 异步检测并强制终止所有程序目录下的output\node.exe进程
+        /// </summary>
+        private async Task KillNodeProcessAsync()
+        {
+            try
+            {
+                Log("检查 node.exe 进程状态...");
+
+                // 获取当前应用程序的执行目录
+                string executablePath = Path.GetDirectoryName(Application.ExecutablePath);
+                string nodeExePath = Path.Combine(executablePath, "output", "node.exe");
+
+                // 获取所有node.exe进程
+                Process[] nodeProcesses = Process.GetProcessesByName("node");
+
+                if (nodeProcesses.Length == 0)
+                {
+                    Log("未发现运行中的 node.exe 进程");
+                    return;
+                }
+
+                Log($"发现 {nodeProcesses.Length} 个 node.exe 进程，开始检查并终止匹配路径的进程...");
+
+                int terminatedCount = 0;
+
+                foreach (Process process in nodeProcesses)
+                {
+                    try
+                    {
+                        // 使用Task.Run将可能耗时的操作放在后台线程执行
+                        string processPath = await Task.Run(() => {
+                            try
+                            {
+                                return process.MainModule?.FileName;
+                            }
+                            catch (Exception)
+                            {
+                                return null;
+                            }
+                        });
+
+                        // 检查是否匹配我们要查找的node.exe路径
+                        if (!string.IsNullOrEmpty(processPath) &&
+                            processPath.Equals(nodeExePath, StringComparison.OrdinalIgnoreCase))
+                        {
+                            // 找到匹配的进程，终止它
+                            Log($"发现匹配路径的 node.exe 进程(ID: {process.Id})，正在强制结束...");
+
+                            await Task.Run(() => {
+                                process.Kill();
+                                process.WaitForExit();
+                            });
+
+                            Log($"成功结束 node.exe 进程(ID: {process.Id})");
+                            terminatedCount++;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // 访问进程信息时可能会因为权限问题抛出异常
+                        Log($"访问或终止进程(ID: {process.Id})时出错: {ex.Message}", true);
+                    }
+                }
+
+                if (terminatedCount > 0)
+                {
+                    Log($"总共终止了 {terminatedCount} 个匹配路径的 node.exe 进程");
+                }
+                else
+                {
+                    Log("未发现需要终止的 node.exe 进程");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log($"检查或终止 node.exe 进程时出错: {ex.Message}", true);
+            }
+        }
+
+
+
 
     }
 }

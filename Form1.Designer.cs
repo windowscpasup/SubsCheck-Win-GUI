@@ -33,7 +33,7 @@
             this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.button4 = new System.Windows.Forms.Button();
+            this.comboBox4 = new System.Windows.Forms.ComboBox();
             this.button3 = new System.Windows.Forms.Button();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.comboBox1 = new System.Windows.Forms.ComboBox();
@@ -43,7 +43,6 @@
             this.numericUpDown3 = new System.Windows.Forms.NumericUpDown();
             this.numericUpDown2 = new System.Windows.Forms.NumericUpDown();
             this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
-            this.label8 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
@@ -53,9 +52,13 @@
             this.label1 = new System.Windows.Forms.Label();
             this.button2 = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
+            this.numericUpDown7 = new System.Windows.Forms.NumericUpDown();
+            this.label20 = new System.Windows.Forms.Label();
+            this.label8 = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.button5 = new System.Windows.Forms.Button();
             this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.comboBox3 = new System.Windows.Forms.ComboBox();
             this.label10 = new System.Windows.Forms.Label();
@@ -64,8 +67,6 @@
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.timer2 = new System.Windows.Forms.Timer(this.components);
             this.groupBox4 = new System.Windows.Forms.GroupBox();
-            this.textBox10 = new System.Windows.Forms.TextBox();
-            this.label19 = new System.Windows.Forms.Label();
             this.textBox4 = new System.Windows.Forms.TextBox();
             this.label13 = new System.Windows.Forms.Label();
             this.textBox3 = new System.Windows.Forms.TextBox();
@@ -85,7 +86,8 @@
             this.label17 = new System.Windows.Forms.Label();
             this.textBox9 = new System.Windows.Forms.TextBox();
             this.label18 = new System.Windows.Forms.Label();
-            this.button5 = new System.Windows.Forms.Button();
+            this.label19 = new System.Windows.Forms.Label();
+            this.comboBox5 = new System.Windows.Forms.ComboBox();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown6)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown5)).BeginInit();
@@ -93,6 +95,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown3)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown7)).BeginInit();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.groupBox4.SuspendLayout();
@@ -115,7 +118,7 @@
             // 
             // groupBox1
             // 
-            this.groupBox1.Controls.Add(this.button4);
+            this.groupBox1.Controls.Add(this.comboBox4);
             this.groupBox1.Controls.Add(this.button3);
             this.groupBox1.Controls.Add(this.textBox1);
             this.groupBox1.Controls.Add(this.comboBox1);
@@ -125,7 +128,6 @@
             this.groupBox1.Controls.Add(this.numericUpDown3);
             this.groupBox1.Controls.Add(this.numericUpDown2);
             this.groupBox1.Controls.Add(this.numericUpDown1);
-            this.groupBox1.Controls.Add(this.label8);
             this.groupBox1.Controls.Add(this.label7);
             this.groupBox1.Controls.Add(this.label4);
             this.groupBox1.Controls.Add(this.label5);
@@ -135,38 +137,42 @@
             this.groupBox1.Controls.Add(this.label1);
             this.groupBox1.Controls.Add(this.button2);
             this.groupBox1.Controls.Add(this.button1);
+            this.groupBox1.Controls.Add(this.numericUpDown7);
+            this.groupBox1.Controls.Add(this.label20);
+            this.groupBox1.Controls.Add(this.label8);
             this.groupBox1.Location = new System.Drawing.Point(13, 13);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(174, 458);
+            this.groupBox1.Size = new System.Drawing.Size(174, 484);
             this.groupBox1.TabIndex = 0;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "参数设置";
             // 
-            // button4
+            // comboBox4
             // 
-            this.button4.Enabled = false;
-            this.button4.Location = new System.Drawing.Point(88, 425);
-            this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(75, 23);
-            this.button4.TabIndex = 19;
-            this.button4.Text = "Clash订阅";
-            this.button4.UseVisualStyleBackColor = true;
-            this.button4.Click += new System.EventHandler(this.button4_Click);
+            this.comboBox4.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBox4.FormattingEnabled = true;
+            this.comboBox4.Items.AddRange(new object[] {
+            "通用订阅",
+            "Clash"});
+            this.comboBox4.Location = new System.Drawing.Point(8, 423);
+            this.comboBox4.Name = "comboBox4";
+            this.comboBox4.Size = new System.Drawing.Size(74, 20);
+            this.comboBox4.TabIndex = 19;
             // 
             // button3
             // 
             this.button3.Enabled = false;
-            this.button3.Location = new System.Drawing.Point(88, 396);
+            this.button3.Location = new System.Drawing.Point(88, 421);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(75, 23);
             this.button3.TabIndex = 18;
-            this.button3.Text = "Base64订阅";
+            this.button3.Text = "复制订阅";
             this.button3.UseVisualStyleBackColor = true;
             this.button3.Click += new System.EventHandler(this.button3_Click);
             // 
             // textBox1
             // 
-            this.textBox1.Location = new System.Drawing.Point(9, 232);
+            this.textBox1.Location = new System.Drawing.Point(9, 257);
             this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
             this.textBox1.ScrollBars = System.Windows.Forms.ScrollBars.Both;
@@ -184,7 +190,7 @@
             "gist",
             "r2",
             "webdav"});
-            this.comboBox1.Location = new System.Drawing.Point(105, 186);
+            this.comboBox1.Location = new System.Drawing.Point(105, 214);
             this.comboBox1.Name = "comboBox1";
             this.comboBox1.Size = new System.Drawing.Size(58, 20);
             this.comboBox1.TabIndex = 16;
@@ -211,6 +217,7 @@
             0,
             0,
             0});
+            this.numericUpDown6.ValueChanged += new System.EventHandler(this.numericUpDown6_ValueChanged);
             // 
             // numericUpDown5
             // 
@@ -317,19 +324,10 @@
             0,
             0});
             // 
-            // label8
-            // 
-            this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(7, 217);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(101, 12);
-            this.label8.TabIndex = 9;
-            this.label8.Text = "节点池订阅地址：";
-            // 
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(7, 189);
+            this.label7.Location = new System.Drawing.Point(7, 217);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(65, 12);
             this.label7.TabIndex = 8;
@@ -340,9 +338,9 @@
             this.label4.AutoSize = true;
             this.label4.Location = new System.Drawing.Point(7, 161);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(65, 12);
+            this.label4.Size = new System.Drawing.Size(89, 12);
             this.label4.TabIndex = 7;
-            this.label4.Text = "订阅端口：";
+            this.label4.Text = "HTTP服务端口：";
             // 
             // label5
             // 
@@ -391,7 +389,7 @@
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(7, 425);
+            this.button2.Location = new System.Drawing.Point(88, 450);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(75, 23);
             this.button2.TabIndex = 1;
@@ -401,7 +399,8 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(7, 396);
+            this.button1.Font = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.button1.Location = new System.Drawing.Point(7, 450);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(75, 23);
             this.button1.TabIndex = 0;
@@ -409,12 +408,53 @@
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
+            // numericUpDown7
+            // 
+            this.numericUpDown7.Location = new System.Drawing.Point(105, 186);
+            this.numericUpDown7.Maximum = new decimal(new int[] {
+            65535,
+            0,
+            0,
+            0});
+            this.numericUpDown7.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.numericUpDown7.Name = "numericUpDown7";
+            this.numericUpDown7.Size = new System.Drawing.Size(58, 21);
+            this.numericUpDown7.TabIndex = 21;
+            this.numericUpDown7.Value = new decimal(new int[] {
+            8299,
+            0,
+            0,
+            0});
+            this.numericUpDown7.ValueChanged += new System.EventHandler(this.numericUpDown6_ValueChanged);
+            // 
+            // label20
+            // 
+            this.label20.AutoSize = true;
+            this.label20.Location = new System.Drawing.Point(7, 189);
+            this.label20.Name = "label20";
+            this.label20.Size = new System.Drawing.Size(95, 12);
+            this.label20.TabIndex = 20;
+            this.label20.Text = "Sub-Store端口：";
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(7, 242);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(101, 12);
+            this.label8.TabIndex = 9;
+            this.label8.Text = "节点池订阅地址：";
+            // 
             // groupBox2
             // 
             this.groupBox2.Controls.Add(this.richTextBox1);
             this.groupBox2.Location = new System.Drawing.Point(193, 13);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(600, 458);
+            this.groupBox2.Size = new System.Drawing.Size(600, 484);
             this.groupBox2.TabIndex = 1;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "实时日志";
@@ -425,24 +465,36 @@
             this.richTextBox1.Location = new System.Drawing.Point(3, 17);
             this.richTextBox1.Name = "richTextBox1";
             this.richTextBox1.ReadOnly = true;
-            this.richTextBox1.Size = new System.Drawing.Size(594, 438);
+            this.richTextBox1.Size = new System.Drawing.Size(594, 464);
             this.richTextBox1.TabIndex = 0;
             this.richTextBox1.Text = "";
             // 
             // groupBox3
             // 
+            this.groupBox3.Controls.Add(this.comboBox5);
+            this.groupBox3.Controls.Add(this.label19);
             this.groupBox3.Controls.Add(this.button5);
             this.groupBox3.Controls.Add(this.checkBox1);
             this.groupBox3.Controls.Add(this.comboBox3);
             this.groupBox3.Controls.Add(this.label10);
             this.groupBox3.Controls.Add(this.comboBox2);
             this.groupBox3.Controls.Add(this.label9);
-            this.groupBox3.Location = new System.Drawing.Point(13, 477);
+            this.groupBox3.Location = new System.Drawing.Point(13, 503);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(780, 51);
+            this.groupBox3.Size = new System.Drawing.Size(780, 79);
             this.groupBox3.TabIndex = 2;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "高级设置";
+            // 
+            // button5
+            // 
+            this.button5.Location = new System.Drawing.Point(698, 16);
+            this.button5.Name = "button5";
+            this.button5.Size = new System.Drawing.Size(75, 23);
+            this.button5.TabIndex = 20;
+            this.button5.Text = "更新内核";
+            this.button5.UseVisualStyleBackColor = true;
+            this.button5.Click += new System.EventHandler(this.button5_Click);
             // 
             // checkBox1
             // 
@@ -695,7 +747,7 @@
             "t.992699.xyz",
             "tube.20140301.xyz",
             "wfgithub.xiaonuomi.ie.eu.org"});
-            this.comboBox3.Location = new System.Drawing.Point(198, 18);
+            this.comboBox3.Location = new System.Drawing.Point(197, 18);
             this.comboBox3.Name = "comboBox3";
             this.comboBox3.Size = new System.Drawing.Size(120, 20);
             this.comboBox3.TabIndex = 21;
@@ -705,7 +757,7 @@
             // label10
             // 
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(111, 22);
+            this.label10.Location = new System.Drawing.Point(111, 21);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(89, 12);
             this.label10.TabIndex = 20;
@@ -731,7 +783,7 @@
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(324, 22);
+            this.label9.Location = new System.Drawing.Point(323, 21);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(65, 12);
             this.label9.TabIndex = 18;
@@ -751,15 +803,13 @@
             // 
             // groupBox4
             // 
-            this.groupBox4.Controls.Add(this.textBox10);
-            this.groupBox4.Controls.Add(this.label19);
             this.groupBox4.Controls.Add(this.textBox4);
             this.groupBox4.Controls.Add(this.label13);
             this.groupBox4.Controls.Add(this.textBox3);
             this.groupBox4.Controls.Add(this.label12);
             this.groupBox4.Controls.Add(this.textBox2);
             this.groupBox4.Controls.Add(this.label11);
-            this.groupBox4.Location = new System.Drawing.Point(13, 534);
+            this.groupBox4.Location = new System.Drawing.Point(13, 588);
             this.groupBox4.Name = "groupBox4";
             this.groupBox4.Size = new System.Drawing.Size(780, 51);
             this.groupBox4.TabIndex = 4;
@@ -767,33 +817,17 @@
             this.groupBox4.Text = "Gist 上传参数";
             this.groupBox4.Visible = false;
             // 
-            // textBox10
-            // 
-            this.textBox10.Location = new System.Drawing.Point(439, 18);
-            this.textBox10.Name = "textBox10";
-            this.textBox10.Size = new System.Drawing.Size(100, 21);
-            this.textBox10.TabIndex = 7;
-            // 
-            // label19
-            // 
-            this.label19.AutoSize = true;
-            this.label19.Location = new System.Drawing.Point(359, 21);
-            this.label19.Name = "label19";
-            this.label19.Size = new System.Drawing.Size(83, 12);
-            this.label19.TabIndex = 6;
-            this.label19.Text = "Github Name：";
-            // 
             // textBox4
             // 
-            this.textBox4.Location = new System.Drawing.Point(653, 18);
+            this.textBox4.Location = new System.Drawing.Point(467, 18);
             this.textBox4.Name = "textBox4";
-            this.textBox4.Size = new System.Drawing.Size(120, 21);
+            this.textBox4.Size = new System.Drawing.Size(306, 21);
             this.textBox4.TabIndex = 5;
             // 
             // label13
             // 
             this.label13.AutoSize = true;
-            this.label13.Location = new System.Drawing.Point(545, 21);
+            this.label13.Location = new System.Drawing.Point(359, 21);
             this.label13.Name = "label13";
             this.label13.Size = new System.Drawing.Size(113, 12);
             this.label13.TabIndex = 4;
@@ -847,7 +881,7 @@
             this.groupBox5.Controls.Add(this.label15);
             this.groupBox5.Controls.Add(this.textBox7);
             this.groupBox5.Controls.Add(this.label16);
-            this.groupBox5.Location = new System.Drawing.Point(13, 591);
+            this.groupBox5.Location = new System.Drawing.Point(13, 645);
             this.groupBox5.Name = "groupBox5";
             this.groupBox5.Size = new System.Drawing.Size(780, 51);
             this.groupBox5.TabIndex = 6;
@@ -901,7 +935,7 @@
             this.groupBox6.Controls.Add(this.label17);
             this.groupBox6.Controls.Add(this.textBox9);
             this.groupBox6.Controls.Add(this.label18);
-            this.groupBox6.Location = new System.Drawing.Point(13, 648);
+            this.groupBox6.Location = new System.Drawing.Point(13, 702);
             this.groupBox6.Name = "groupBox6";
             this.groupBox6.Size = new System.Drawing.Size(780, 51);
             this.groupBox6.TabIndex = 6;
@@ -963,15 +997,33 @@
             this.label18.TabIndex = 0;
             this.label18.Text = "Username：";
             // 
-            // button5
+            // label19
             // 
-            this.button5.Location = new System.Drawing.Point(698, 16);
-            this.button5.Name = "button5";
-            this.button5.Size = new System.Drawing.Size(75, 23);
-            this.button5.TabIndex = 20;
-            this.button5.Text = "更新内核";
-            this.button5.UseVisualStyleBackColor = true;
-            this.button5.Click += new System.EventHandler(this.button5_Click);
+            this.label19.AutoSize = true;
+            this.label19.Location = new System.Drawing.Point(11, 48);
+            this.label19.Name = "label19";
+            this.label19.Size = new System.Drawing.Size(149, 12);
+            this.label19.TabIndex = 23;
+            this.label19.Text = "Clash订阅 覆写配置文件：";
+            // 
+            // comboBox5
+            // 
+            this.comboBox5.FormattingEnabled = true;
+            this.comboBox5.Items.AddRange(new object[] {
+            "https://raw.githubusercontent.com/mihomo-party-org/override-hub/main/yaml/布丁狗的订阅转" +
+                "换.yaml",
+            "https://raw.githubusercontent.com/mihomo-party-org/override-hub/main/yaml/ACL4SSR" +
+                "_Online_Full.yaml",
+            "https://raw.githubusercontent.com/mihomo-party-org/override-hub/main/yaml/ACL4SSR" +
+                "_Online_Full_WithIcon.yaml",
+            "https://raw.githubusercontent.com/mihomo-party-org/override-hub/main/yaml/添加直连规则." +
+                "yaml"});
+            this.comboBox5.Location = new System.Drawing.Point(162, 46);
+            this.comboBox5.Name = "comboBox5";
+            this.comboBox5.Size = new System.Drawing.Size(611, 20);
+            this.comboBox5.TabIndex = 24;
+            this.comboBox5.Text = "https://raw.githubusercontent.com/mihomo-party-org/override-hub/main/yaml/ACL4SSR" +
+    "_Online_Full.yaml";
             // 
             // Form1
             // 
@@ -979,7 +1031,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.ClientSize = new System.Drawing.Size(800, 711);
+            this.ClientSize = new System.Drawing.Size(800, 749);
             this.Controls.Add(this.groupBox6);
             this.Controls.Add(this.groupBox5);
             this.Controls.Add(this.groupBox4);
@@ -999,6 +1051,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown3)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown7)).EndInit();
             this.groupBox2.ResumeLayout(false);
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
@@ -1044,7 +1097,6 @@
         private System.Windows.Forms.CheckBox checkBox1;
         private System.Windows.Forms.RichTextBox richTextBox1;
         private System.Windows.Forms.ProgressBar progressBar1;
-        private System.Windows.Forms.Button button4;
         private System.Windows.Forms.Button button3;
         private System.Windows.Forms.Timer timer2;
         private System.Windows.Forms.GroupBox groupBox4;
@@ -1067,9 +1119,12 @@
         private System.Windows.Forms.Label label17;
         private System.Windows.Forms.TextBox textBox9;
         private System.Windows.Forms.Label label18;
-        private System.Windows.Forms.TextBox textBox10;
-        private System.Windows.Forms.Label label19;
         private System.Windows.Forms.Button button5;
+        private System.Windows.Forms.ComboBox comboBox4;
+        private System.Windows.Forms.NumericUpDown numericUpDown7;
+        private System.Windows.Forms.Label label20;
+        private System.Windows.Forms.Label label19;
+        private System.Windows.Forms.ComboBox comboBox5;
     }
 }
 
