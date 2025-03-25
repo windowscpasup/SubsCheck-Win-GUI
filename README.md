@@ -38,13 +38,20 @@ subs-check_Windows_i386.zip # subs-check x86_32位 内核压缩包 
 config
  └─ config.yaml             # subs-check 配置文件  
 output
- ├─ all.txt                 # base64格式 测试结果
- └─ all.yaml                # yaml格式 测试结果
+ ├─ all.yaml                # yaml格式 测试结果
+ ├─ node.exe
+ ├─ root.json
+ ├─ sub-store.bundle.js
+ ├─ sub-store.json
+ └─ sub-store.log
 Newtonsoft.Json.dll         # 验证版本信息组件
 Newtonsoft.Json.xml         # 验证版本信息组件
 YamlDotNet.dll              # yaml读写组件
 YamlDotNet.xml              # yaml读写组件
 ```
 
+## Star 星星走起
+[![Stargazers over time](https://starchart.cc/cmliu/SubsCheck-Win-GUI.svg?variant=adaptive)](https://starchart.cc/cmliu/SubsCheck-Win-GUI)
+
 # 🙏 致谢
-[beck-8](https://github.com/beck-8/subs-check)、[bestruirui](https://github.com/bestruirui/BestSub)、GPT
+[beck-8](https://github.com/beck-8/subs-check)、[bestruirui](https://github.com/bestruirui/BestSub)、[Sub-Store](https://github.com/sub-store-org/Sub-Store)、GPT
