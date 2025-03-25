@@ -219,6 +219,7 @@
             0,
             0,
             0});
+            this.numericUpDown6.Visible = false;
             this.numericUpDown6.ValueChanged += new System.EventHandler(this.numericUpDown6_ValueChanged);
             // 
             // numericUpDown5
@@ -242,6 +243,7 @@
             0,
             0,
             0});
+            this.numericUpDown5.Visible = false;
             // 
             // numericUpDown4
             // 
@@ -343,6 +345,7 @@
             this.label4.Size = new System.Drawing.Size(89, 12);
             this.label4.TabIndex = 7;
             this.label4.Text = "HTTP服务端口：";
+            this.label4.Visible = false;
             // 
             // label5
             // 
@@ -352,6 +355,7 @@
             this.label5.Size = new System.Drawing.Size(89, 12);
             this.label5.TabIndex = 6;
             this.label5.Text = "测速时间(秒)：";
+            this.label5.Visible = false;
             // 
             // label6
             // 
@@ -431,6 +435,7 @@
             0,
             0,
             0});
+            this.numericUpDown7.Visible = false;
             this.numericUpDown7.ValueChanged += new System.EventHandler(this.numericUpDown6_ValueChanged);
             // 
             // label20
@@ -441,6 +446,7 @@
             this.label20.Size = new System.Drawing.Size(95, 12);
             this.label20.TabIndex = 20;
             this.label20.Text = "Sub-Store端口：";
+            this.label20.Visible = false;
             // 
             // label8
             // 

@@ -530,11 +530,23 @@ namespace subs_check.win.gui
             {
                 button2.Text = "高级设置∨";
                 groupBox3.Visible = false;
+                numericUpDown5.Visible = false;
+                numericUpDown6.Visible = false;
+                numericUpDown7.Visible = false;
+                label4.Visible = false;
+                label5.Visible = false;
+                label20.Visible = false;
             }
             else
             {
                 button2.Text = "高级设置∧";
                 groupBox3.Visible = true;
+                numericUpDown5.Visible = true;
+                numericUpDown6.Visible = true;
+                numericUpDown7.Visible = true;
+                label4.Visible = true;
+                label5.Visible = true;
+                label20.Visible = true;
             }
             判断保存类型();
         }
@@ -1124,6 +1136,7 @@ namespace subs_check.win.gui
         private void comboBox1_TextChanged(object sender, EventArgs e)
         {
             判断保存类型();
+            if(!(comboBox1.Text == "本地" || comboBox1.Text == "") && button2.Text == "高级设置∨") button2_Click(sender, e);
         }
 
         private void textBox3_Enter(object sender, EventArgs e)
