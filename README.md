@@ -39,11 +39,11 @@ config
  └─ config.yaml             # subs-check 配置文件  
 output
  ├─ all.yaml                # yaml格式 测试结果
- ├─ node.exe
- ├─ root.json
- ├─ sub-store.bundle.js
- ├─ sub-store.json
- └─ sub-store.log
+ ├─ node.exe                # sub-store 服务
+ ├─ root.json               # sub-store 配置文件
+ ├─ sub-store.bundle.js     # sub-store js文件
+ ├─ sub-store.json          # sub-store json文件
+ └─ sub-store.log           # sub-store 日志
 Newtonsoft.Json.dll         # 验证版本信息组件
 Newtonsoft.Json.xml         # 验证版本信息组件
 YamlDotNet.dll              # yaml读写组件
