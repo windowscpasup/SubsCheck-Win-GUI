@@ -36,7 +36,7 @@ namespace subs_check.win.gui
             toolTip1.SetToolTip(numericUpDown3, "超时时间(毫秒)：节点的最大延迟。");
             toolTip1.SetToolTip(numericUpDown4, "最低测速结果舍弃(KB/s)。");
             toolTip1.SetToolTip(numericUpDown5, "下载测试时间(s)：与下载链接大小相关，默认最大测试10s。");
-            toolTip1.SetToolTip(numericUpDown6, "本地监听端口：用于直接返回测速结果的节点信息，方便订阅转换。\n注意：除非你知道你在干什么，否则不要将你的本地订阅端口暴露到公网，否则可能会被滥用");
+            toolTip1.SetToolTip(numericUpDown6, "本地监听端口：用于直接返回测速结果的节点信息，方便 Sub-Store 实现订阅转换。");
             toolTip1.SetToolTip(numericUpDown7, "Sub-Store监听端口：用于订阅订阅转换。\n注意：除非你知道你在干什么，否则不要将你的 Sub-Store 暴露到公网，否则可能会被滥用");
             toolTip1.SetToolTip(textBox1, "节点池订阅地址：支持 Link、Base64、Clash 格式的订阅链接。");
             toolTip1.SetToolTip(checkBox1, "以节点IP查询位置重命名节点。\n质量差的节点可能造成IP查询失败，造成整体检查速度稍微变慢。");
@@ -281,8 +281,17 @@ namespace subs_check.win.gui
                     string listenport = 读取config字符串(config, "listen-port");
                     if (listenport != null)
                     {
-                        listenport = listenport.Replace(":", "");
-                        numericUpDown6.Value = decimal.Parse(listenport);
+                        // 查找最后一个冒号的位置
+                        int colonIndex = listenport.LastIndexOf(':');
+                        if (colonIndex >= 0 && colonIndex < listenport.Length - 1)
+                        {
+                            // 提取冒号后面的部分作为端口号
+                            string portStr = listenport.Substring(colonIndex + 1);
+                            if (decimal.TryParse(portStr, out decimal port))
+                            {
+                                numericUpDown6.Value = port;
+                            }
+                        }
                     }
 
                     int? substoreport = 读取config整数(config, "sub-store-port");
@@ -439,61 +448,66 @@ namespace subs_check.win.gui
                 config["webdav-url"] = textBox5.Text;
 
                 // 保存listen-port
-                config["listen-port"] = $@":{numericUpDown6.Value}";
+                config["listen-port"] = $@"127.0.0.1:{numericUpDown6.Value}";
                 // 保存sub-store-port
                 config["sub-store-port"] = numericUpDown7.Value;
 
                 // 保存githubproxy
-                if (!string.IsNullOrEmpty(comboBox3.Text)) config["githubproxy"] = comboBox3.Text;
+                if (!string.IsNullOrEmpty(comboBox3.Text)) 
+                {
+                    comboBox3.Text = "自动选择";
+                    config["githubproxy"] = comboBox3.Text;
+                }
+                
+                string githubRawPrefix = "https://raw.githubusercontent.com/";
+                // 检查并处理 GitHub Raw URLs
+                if ( comboBox3.Text == "自动选择")
+                {
+                    // 创建不包含"自动选择"的代理列表
+                    List<string> proxyItems = new List<string>();
+                    for (int j = 0; j < comboBox3.Items.Count; j++)
+                    {
+                        string proxyItem = comboBox3.Items[j].ToString();
+                        if (proxyItem != "自动选择")
+                            proxyItems.Add(proxyItem);
+                    }
 
-                // 保存sub-urls列表，将textBox1的文本按行分割为列表
+                    // 随机打乱列表顺序
+                    Random random = new Random();
+                    proxyItems = proxyItems.OrderBy(x => random.Next()).ToList();
+
+                    // 异步检测可用代理
+                    githubProxyURL = await DetectGitHubProxyAsync(proxyItems);
+                }
+                else
+                {
+                    githubProxyURL = $"https://{comboBox3.Text}/";
+                }
+
+                // 保存sub-urls列表
+                List<string> subUrls = new List<string>();
+                // 只有在textBox1有内容时添加
                 if (!string.IsNullOrEmpty(textBox1.Text))
                 {
-                    var subUrls = textBox1.Text.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries).ToList();
-
-                    // 检查并处理 GitHub Raw URLs
-                    if (!string.IsNullOrEmpty(comboBox3.Text))
+                    subUrls.AddRange(textBox1.Text.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries).ToList());
+                    // 处理URLs
+                    for (int i = 0; i < subUrls.Count; i++)
                     {
-                        const string githubRawPrefix = "https://raw.githubusercontent.com/";
-
-                        if (comboBox3.Text == "自动选择")
+                        if (subUrls[i].StartsWith(githubRawPrefix) && !string.IsNullOrEmpty(githubProxyURL))
                         {
-                            // 创建不包含"自动选择"的代理列表
-                            List<string> proxyItems = new List<string>();
-                            for (int j = 0; j < comboBox3.Items.Count; j++)
-                            {
-                                string proxyItem = comboBox3.Items[j].ToString();
-                                if (proxyItem != "自动选择")
-                                    proxyItems.Add(proxyItem);
-                            }
-
-                            // 随机打乱列表顺序
-                            Random random = new Random();
-                            proxyItems = proxyItems.OrderBy(x => random.Next()).ToList();
-
-                            // 异步检测可用代理
-                            githubProxyURL = await DetectGitHubProxyAsync(proxyItems);
-                        }
-                        else
-                        {
-                            githubProxyURL = $"https://{comboBox3.Text}/";
-                        }
-
-                        // 处理URLs
-                        for (int i = 0; i < subUrls.Count; i++)
-                        {
-                            if (subUrls[i].StartsWith(githubRawPrefix) && !string.IsNullOrEmpty(githubProxyURL))
-                            {
-                                // 替换为代理 URL 格式
-                                subUrls[i] = githubProxyURL + githubRawPrefix + subUrls[i].Substring(githubRawPrefix.Length);
-                            }
+                            // 替换为代理 URL 格式
+                            subUrls[i] = githubProxyURL + githubRawPrefix + subUrls[i].Substring(githubRawPrefix.Length);
                         }
                     }
-                    string allyamlFilePath = System.IO.Path.Combine(executablePath, "output", "all.yaml");
-                    if (System.IO.File.Exists(allyamlFilePath)) subUrls.Add($"http://127.0.0.1:{numericUpDown6.Value}/all.yaml");
-
-                    if (subUrls.Count > 0) config["sub-urls"] = subUrls;
                 }
+
+                subUrls.Add($"http://127.0.0.1:{numericUpDown6.Value}/all.yaml");
+                string allyamlFilePath = System.IO.Path.Combine(executablePath, "output", "all.yaml");
+                if (System.IO.File.Exists(allyamlFilePath))
+                {
+                    Log("已加载上次测试结果。");
+                }
+                config["sub-urls"] = subUrls;
 
                 config["mihomo-overwrite-url"] = githubProxyURL + comboBox5.Text;//Clash订阅 覆写配置文件
 
@@ -1046,12 +1060,149 @@ namespace subs_check.win.gui
             }));
         }
 
-        private void button3_Click(object sender, EventArgs e)
+        /// <summary>
+        /// 获取本地局域网IP地址，如果有多个则让用户选择
+        /// </summary>
+        /// <returns>用户选择的IP地址，如果未选择则返回127.0.0.1</returns>
+        private string GetLocalLANIP()
         {
             try
             {
+                // 获取所有网卡的IP地址
+                List<string> lanIPs = new List<string>();
+
+                // 获取所有网络接口
+                foreach (System.Net.NetworkInformation.NetworkInterface ni in System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces())
+                {
+                    // 排除loopback、虚拟网卡和非活动网卡
+                    if (ni.NetworkInterfaceType != System.Net.NetworkInformation.NetworkInterfaceType.Loopback &&
+                        ni.OperationalStatus == System.Net.NetworkInformation.OperationalStatus.Up)
+                    {
+                        // 获取该网卡的所有IP地址
+                        foreach (System.Net.NetworkInformation.UnicastIPAddressInformation ip in ni.GetIPProperties().UnicastAddresses)
+                        {
+                            // 只添加IPv4地址且不是回环地址
+                            if (ip.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork &&
+                                !System.Net.IPAddress.IsLoopback(ip.Address))
+                            {
+                                lanIPs.Add(ip.Address.ToString());
+                            }
+                        }
+                    }
+                }
+
+                // 如果没有找到任何IP地址，返回本地回环地址
+                if (lanIPs.Count == 0)
+                {
+                    return "127.0.0.1";
+                }
+                // 如果只找到一个IP地址，直接返回
+                else if (lanIPs.Count == 1)
+                {
+                    return lanIPs[0];
+                }
+                // 如果有多个IP地址，让用户选择
+                else
+                {
+                    // 创建选择窗口
+                    Form selectForm = new Form();
+                    selectForm.Text = "选择局域网IP地址";
+                    selectForm.StartPosition = FormStartPosition.CenterParent;
+                    /*
+                    selectForm.Width = 520;  // 保持宽度
+                    selectForm.Height = 320; // 增加高度以容纳额外的警告标签
+                    selectForm.FormBorderStyle = FormBorderStyle.FixedDialog;
+                    */
+                    selectForm.AutoSize = true;  // 启用自动大小调整
+                    selectForm.AutoSizeMode = AutoSizeMode.GrowAndShrink;  // 根据内容调整大小
+                    selectForm.FormBorderStyle = FormBorderStyle.FixedSingle;  // 使用固定但可调整的边框
+                    selectForm.ShowIcon = false;
+                    selectForm.MaximizeBox = false;
+                    selectForm.MinimizeBox = false;
+
+                    // 添加说明标签
+                    Label label = new Label();
+                    label.Text = "发现多个局域网IP地址：\n\n" +
+                                 "· 仅在本机订阅：直接点击【取消】，将使用127.0.0.1\n\n" +
+                                 "· 局域网内其他设备订阅：请在下面列表中选择一个正确的局域网IP";
+                    label.Location = new Point(15, 10);
+                    label.AutoSize = true;
+                    label.MaximumSize = new Size(380, 0); // 设置最大宽度，允许自动换行
+                    selectForm.Controls.Add(label);
+
+                    // 计算标签高度以正确放置列表框
+                    int labelHeight = label.Height + 20;
+
+                    // 添加IP地址列表框
+                    ListBox listBox = new ListBox();
+                    listBox.Location = new Point(15, labelHeight);
+                    listBox.Width = 380;
+                    listBox.Height = 130; // 保持列表框高度
+                    foreach (string ip in lanIPs)
+                    {
+                        listBox.Items.Add(ip);
+                    }
+                    listBox.SelectedIndex = 0; // 默认选择第一个IP
+                    selectForm.Controls.Add(listBox);
+
+                    // 添加警告标签（放在列表框下方）
+                    Label warningLabel = new Label();
+                    warningLabel.Text = "注意：选择错误的IP会导致局域网内其他设备无法正常订阅";
+                    warningLabel.Location = new Point(15, labelHeight + listBox.Height + 10);
+                    warningLabel.AutoSize = true;
+                    warningLabel.ForeColor = Color.Red; // 警告文本使用红色
+                    selectForm.Controls.Add(warningLabel);
+
+                    // 计算按钮位置（居中排布）
+                    int buttonY = labelHeight + listBox.Height + warningLabel.Height + 20;
+                    int buttonTotalWidth = 75 * 2 + 15; // 两个按钮的宽度加间距
+                    int buttonStartX = (selectForm.ClientSize.Width - buttonTotalWidth) / 2;
+
+                    // 添加确定按钮
+                    Button okButton = new Button();
+                    okButton.Text = "确定";
+                    okButton.DialogResult = DialogResult.OK;
+                    okButton.Location = new Point(buttonStartX, buttonY);
+                    okButton.Width = 75;
+                    selectForm.Controls.Add(okButton);
+                    selectForm.AcceptButton = okButton;
+
+                    // 添加取消按钮
+                    Button cancelButton = new Button();
+                    cancelButton.Text = "取消";
+                    cancelButton.DialogResult = DialogResult.Cancel;
+                    cancelButton.Location = new Point(buttonStartX + 90, buttonY);
+                    cancelButton.Width = 75;
+                    selectForm.Controls.Add(cancelButton);
+                    selectForm.CancelButton = cancelButton;
+
+                    // 显示选择窗口
+                    if (selectForm.ShowDialog() == DialogResult.OK)
+                    {
+                        return listBox.SelectedItem.ToString();
+                    }
+                    else
+                    {
+                        return "127.0.0.1"; // 如果用户取消，返回本地回环地址
+                    }
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"获取局域网IP地址时出错: {ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return "127.0.0.1";
+            }
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            string 本地IP = GetLocalLANIP();
+            try
+            {
                 // 构造URL
-                string url = comboBox4.Text == "Clash" ? $"http://127.0.0.1:{numericUpDown7.Value}/api/file/mihomo" : $"http://127.0.0.1:{numericUpDown7.Value}/download/sub";
+                string url = comboBox4.Text == "Clash" ? $"http://{本地IP}:{numericUpDown7.Value}/api/file/mihomo" : $"http://{本地IP}:{numericUpDown7.Value}/download/sub";
 
                 // 将URL复制到剪贴板
                 Clipboard.SetText(url);
@@ -1075,8 +1226,11 @@ namespace subs_check.win.gui
         private void comboBox3_Leave(object sender, EventArgs e)
         {
             // 检查是否有内容
-            if (string.IsNullOrWhiteSpace(comboBox3.Text))
+            if (string.IsNullOrWhiteSpace(comboBox3.Text)) 
+            {
+                comboBox3.Text = "自动选择";
                 return;
+            }
 
             string input = comboBox3.Text.Trim();
 

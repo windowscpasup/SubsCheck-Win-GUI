@@ -512,8 +512,8 @@
             this.comboBox5.Name = "comboBox5";
             this.comboBox5.Size = new System.Drawing.Size(611, 20);
             this.comboBox5.TabIndex = 24;
-            this.comboBox5.Text = "https://raw.githubusercontent.com/mihomo-party-org/override-hub/main/yaml/ACL4SSR" +
-    "_Online_Full.yaml";
+            this.comboBox5.Text = "https://raw.githubusercontent.com/mihomo-party-org/override-hub/main/yaml/布丁狗的订阅转" +
+    "换.yaml";
             // 
             // label19
             // 
