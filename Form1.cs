@@ -12,6 +12,8 @@ using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using YamlDotNet.Core;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.ProgressBar;
 
 namespace subs_check.win.gui
 {
@@ -26,6 +28,7 @@ namespace subs_check.win.gui
         private ToolStripMenuItem stopMenuItem;
         string githubProxyURL = "";
         int run = 0;
+        string 当前subsCheck版本号 = "未知版本";
         public Form1()
         {
             InitializeComponent();
@@ -40,6 +43,7 @@ namespace subs_check.win.gui
             toolTip1.SetToolTip(numericUpDown7, "Sub-Store监听端口：用于订阅订阅转换。\n注意：除非你知道你在干什么，否则不要将你的 Sub-Store 暴露到公网，否则可能会被滥用");
             toolTip1.SetToolTip(textBox1, "节点池订阅地址：支持 Link、Base64、Clash 格式的订阅链接。");
             toolTip1.SetToolTip(checkBox1, "以节点IP查询位置重命名节点。\n质量差的节点可能造成IP查询失败，造成整体检查速度稍微变慢。");
+            toolTip1.SetToolTip(checkBox2, "是否开启流媒体检测，其中IP欺诈依赖'节点地址查询'，内核版本需要 v2.0.8 以上\n\n示例：美国1 | ⬇️ 5.6MB/s |0%|Netflix|Disney|Openai\n风控值：0% (使用ping0.cc标准)\n流媒体解锁：Netflix、Disney、Openai");
             toolTip1.SetToolTip(comboBox3, "GitHub 代理：代理订阅 GitHub raw 节点池。");
             toolTip1.SetToolTip(comboBox2, "测速地址：注意 并发数*节点速度<最大网速 否则测速结果不准确\n尽量不要使用Speedtest，Cloudflare提供的下载链接，因为很多节点屏蔽测速网站。");
             toolTip1.SetToolTip(textBox7, "将测速结果推送到Worker的地址。");
@@ -294,8 +298,26 @@ namespace subs_check.win.gui
                         }
                     }
 
+                    /*
                     int? substoreport = 读取config整数(config, "sub-store-port");
                     if (substoreport.HasValue) numericUpDown7.Value = substoreport.Value;
+                    */
+
+                    string substoreport = 读取config字符串(config, "sub-store-port");
+                    if (substoreport != null)
+                    {
+                        // 查找最后一个冒号的位置
+                        int colonIndex = substoreport.LastIndexOf(':');
+                        if (colonIndex >= 0 && colonIndex < substoreport.Length - 1)
+                        {
+                            // 提取冒号后面的部分作为端口号
+                            string portStr = substoreport.Substring(colonIndex + 1);
+                            if (decimal.TryParse(portStr, out decimal port))
+                            {
+                                numericUpDown7.Value = port;
+                            }
+                        }
+                    }
 
                     string githubproxy = 读取config字符串(config, "githubproxy");
                     if (githubproxy != null) comboBox3.Text = githubproxy;
@@ -346,6 +368,10 @@ namespace subs_check.win.gui
                     if (renamenode != null && renamenode == "true") checkBox1.Checked = true;
                     else checkBox1.Checked = false;
 
+                    string mediacheck = 读取config字符串(config, "media-check");
+                    if (mediacheck != null && mediacheck == "true") checkBox2.Checked = true;
+                    else checkBox2.Checked = false;
+
                     string githubgistid = 读取config字符串(config, "github-gist-id");
                     if (githubgistid != null) textBox2.Text = githubgistid;
                     string githubtoken = 读取config字符串(config, "github-token");
@@ -365,6 +391,9 @@ namespace subs_check.win.gui
                     if (webdavpassword != null) textBox8.Text = webdavpassword;
                     string webdavurl = 读取config字符串(config, "webdav-url");
                     if (webdavurl != null) textBox5.Text = webdavurl;
+
+                    string subscheckversion = 读取config字符串(config, "subscheck-version");
+                    if (subscheckversion != null) 当前subsCheck版本号 = subscheckversion;
                 }
             }
             catch (Exception ex)
@@ -450,7 +479,7 @@ namespace subs_check.win.gui
                 // 保存listen-port
                 config["listen-port"] = $@"127.0.0.1:{numericUpDown6.Value}";
                 // 保存sub-store-port
-                config["sub-store-port"] = numericUpDown7.Value;
+                config["sub-store-port"] = $@"0.0.0.0:{numericUpDown7.Value}";
 
                 // 保存githubproxy
                 config["githubproxy"] = comboBox3.Text;
@@ -507,12 +536,16 @@ namespace subs_check.win.gui
                 }
                 config["sub-urls"] = subUrls;
 
-                config["mihomo-overwrite-url"] = githubProxyURL + comboBox5.Text;//Clash订阅 覆写配置文件
+                //Clash订阅 覆写配置文件
+                if (comboBox5.Text.StartsWith(githubRawPrefix)) config["mihomo-overwrite-url"] = githubProxyURL + comboBox5.Text;
+                else config["mihomo-overwrite-url"] = comboBox5.Text;
 
                 config["rename-node"] = checkBox1.Checked;//以节点IP查询位置重命名节点
+                config["media-check"] = checkBox2.Checked;//是否开启流媒体检测
                 config["keep-success-proxies"] = false;
                 config["print-progress"] = true;//是否显示进度
                 config["sub-urls-retry"] = 3;//重试次数(获取订阅失败后重试次数)
+                config["subscheck-version"] = 当前subsCheck版本号;//当前subsCheck版本号
 
                 // 使用YamlDotNet序列化配置
                 var serializer = new YamlDotNet.Serialization.SerializerBuilder()
@@ -589,7 +622,7 @@ namespace subs_check.win.gui
                 groupBox5.Enabled = false;
                 groupBox6.Enabled = false;
                 button1.Text = "停止";
-
+                timer3.Enabled = true;
                 // 清空 richTextBox1
                 richTextBox1.Clear();
                 await KillNodeProcessAsync();
@@ -636,7 +669,7 @@ namespace subs_check.win.gui
                 groupBox5.Enabled = true;
                 groupBox6.Enabled = true;
                 button1.Text = "启动";
-
+                timer3.Enabled = false;
                 // 更新菜单项的启用状态
                 startMenuItem.Enabled = true;
                 stopMenuItem.Enabled = false;
@@ -756,7 +789,9 @@ namespace subs_check.win.gui
                                         // 解压文件
                                         exeEntry.ExtractToFile(exeFilePath);
 
-                                        Log("subs-check.exe 已就绪！");
+                                        Log($"subs-check.exe {当前subsCheck版本号} 已就绪！");
+                                        当前subsCheck版本号 = latestVersion;
+                                        await SaveConfig(false);
                                         // 这里保留原有行为，不修改button1.Enabled
 
                                         // 删除下载的zip文件
@@ -882,7 +917,7 @@ namespace subs_check.win.gui
                 subsCheckProcess.EnableRaisingEvents = true;
                 subsCheckProcess.Exited += SubsCheckProcess_Exited;
 
-                Log("subs-check.exe 已启动...");
+                Log($"subs-check.exe {当前subsCheck版本号} 已启动...");
             }
             catch (Exception ex)
             {
@@ -1704,6 +1739,44 @@ namespace subs_check.win.gui
                 }
             }
 
+        }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            if (checkBox1.Checked == false) checkBox2.Checked = false;
+        }
+
+        private void checkBox2_CheckedChanged(object sender, EventArgs e)
+        {
+            if (checkBox2.Checked == true) checkBox1.Checked = true;
+        }
+
+        private async void timer3_Tick(object sender, EventArgs e)
+        {
+            if (button1.Text == "停止") 
+            {
+                Log("subs-check.exe 运行时满24小时，自动重启清理内存占用。");
+                // 停止 subs-check.exe 程序
+                StopSubsCheckProcess();
+                // 结束 Sub-Store
+                await KillNodeProcessAsync();
+                // 重新启动 subs-check.exe 程序
+                StartSubsCheckProcess();
+                numericUpDown1.Enabled = false;
+                numericUpDown2.Enabled = false;
+                numericUpDown3.Enabled = false;
+                numericUpDown4.Enabled = false;
+                numericUpDown5.Enabled = false;
+                numericUpDown6.Enabled = false;
+                numericUpDown7.Enabled = false;
+                comboBox1.Enabled = false;
+                textBox1.Enabled = false;
+                groupBox3.Enabled = false;
+                groupBox4.Enabled = false;
+                groupBox5.Enabled = false;
+                groupBox6.Enabled = false;
+                button1.Text = "停止";
+            }
         }
     }
 }
