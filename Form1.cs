@@ -453,12 +453,8 @@ namespace subs_check.win.gui
                 config["sub-store-port"] = numericUpDown7.Value;
 
                 // 保存githubproxy
-                if (!string.IsNullOrEmpty(comboBox3.Text)) 
-                {
-                    comboBox3.Text = "自动选择";
-                    config["githubproxy"] = comboBox3.Text;
-                }
-                
+                config["githubproxy"] = comboBox3.Text;
+
                 string githubRawPrefix = "https://raw.githubusercontent.com/";
                 // 检查并处理 GitHub Raw URLs
                 if ( comboBox3.Text == "自动选择")
