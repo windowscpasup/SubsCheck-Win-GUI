@@ -24,7 +24,7 @@ namespace subs_check.win.gui
         private Icon originalNotifyIcon; // 保存原始图标
         private ToolStripMenuItem startMenuItem;
         private ToolStripMenuItem stopMenuItem;
-        string githubProxyURL;
+        string githubProxyURL = "";
         int run = 0;
         public Form1()
         {
@@ -410,7 +410,7 @@ namespace subs_check.win.gui
             return null;
         }
 
-        private async Task SaveConfig()//保存配置文件
+        private async Task SaveConfig(bool githubProxyCheck = true)//保存配置文件
         {
             try
             {
@@ -456,29 +456,31 @@ namespace subs_check.win.gui
                 config["githubproxy"] = comboBox3.Text;
 
                 string githubRawPrefix = "https://raw.githubusercontent.com/";
-                // 检查并处理 GitHub Raw URLs
-                if ( comboBox3.Text == "自动选择")
+                if (githubProxyCheck)
                 {
-                    // 创建不包含"自动选择"的代理列表
-                    List<string> proxyItems = new List<string>();
-                    for (int j = 0; j < comboBox3.Items.Count; j++)
+                    // 检查并处理 GitHub Raw URLs
+                    if (comboBox3.Text == "自动选择")
                     {
-                        string proxyItem = comboBox3.Items[j].ToString();
-                        if (proxyItem != "自动选择")
-                            proxyItems.Add(proxyItem);
+                        // 创建不包含"自动选择"的代理列表
+                        List<string> proxyItems = new List<string>();
+                        for (int j = 0; j < comboBox3.Items.Count; j++)
+                        {
+                            string proxyItem = comboBox3.Items[j].ToString();
+                            if (proxyItem != "自动选择")
+                                proxyItems.Add(proxyItem);
+                        }
+
+                        // 随机打乱列表顺序
+                        Random random = new Random();
+                        proxyItems = proxyItems.OrderBy(x => random.Next()).ToList();
+
+                        // 异步检测可用代理
+                        githubProxyURL = await DetectGitHubProxyAsync(proxyItems);
                     }
-
-                    // 随机打乱列表顺序
-                    Random random = new Random();
-                    proxyItems = proxyItems.OrderBy(x => random.Next()).ToList();
-
-                    // 异步检测可用代理
-                    githubProxyURL = await DetectGitHubProxyAsync(proxyItems);
                 }
-                else
-                {
-                    githubProxyURL = $"https://{comboBox3.Text}/";
-                }
+                else if(comboBox3.Text == "自动选择") githubProxyURL = "";
+
+                if (comboBox3.Text != "自动选择") githubProxyURL = $"https://{comboBox3.Text}/";
 
                 // 保存sub-urls列表
                 List<string> subUrls = new List<string>();
@@ -1664,7 +1666,7 @@ namespace subs_check.win.gui
             }
         }
 
-        private void textBox1_DoubleClick(object sender, EventArgs e)
+        private async void textBox1_DoubleClick(object sender, EventArgs e)
         {
             if (textBox1.Enabled)
             {
@@ -1697,6 +1699,8 @@ namespace subs_check.win.gui
 
                     // 将处理后的内容更新到Form1的textBox1
                     textBox1.Text = string.Join(Environment.NewLine, lines);
+                    await SaveConfig(false);
+                    Log("已保存订阅地址列表。");
                 }
             }
 
