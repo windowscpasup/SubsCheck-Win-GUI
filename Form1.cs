@@ -697,7 +697,15 @@ namespace subs_check.win.gui
                     return;
                 }
 
-                using (HttpClient client = new HttpClient())
+                // 创建不使用系统代理的 HttpClientHandler
+                HttpClientHandler handler = new HttpClientHandler
+                {
+                    UseProxy = false,
+                    Proxy = null
+                };
+
+                // 使用自定义 handler 创建 HttpClient
+                using (HttpClient client = new HttpClient(handler))
                 {
                     try
                     {
@@ -794,7 +802,7 @@ namespace subs_check.win.gui
                                         exeEntry.ExtractToFile(exeFilePath);
                                         当前subsCheck版本号 = latestVersion;
                                         Log($"subs-check.exe {当前subsCheck版本号} 已就绪！");
-                                        
+
                                         await SaveConfig(false);
                                         // 这里保留原有行为，不修改button1.Enabled
 
@@ -835,6 +843,7 @@ namespace subs_check.win.gui
 
             button1.Enabled = true;
         }
+
 
         private async void StartSubsCheckProcess()
         {

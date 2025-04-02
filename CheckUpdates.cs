@@ -194,14 +194,34 @@ namespace subs_check.win.gui
                 // 写入文件（如果文件已存在会被覆盖）
                 System.IO.File.WriteAllText(iniFilePath, iniContent);
 
-                MessageBox.Show("程序将自动执行更新！",
-                    "更新准备就绪",
-                    MessageBoxButtons.OK,
+                DialogResult result = MessageBox.Show(
+                    $"发现新版本: {最新GUI版本号}\n\n" +
+                    "· 点击【确定】将下载并安装更新\n" +
+                    "· 更新过程中程序会自动关闭并重启\n" +
+                    "· 更新完成后所有设置将保持不变\n\n" +
+                    "是否立即更新到最新版本？",
+                    "发现新版本",
+                    MessageBoxButtons.OKCancel,
                     MessageBoxIcon.Information);
 
-                // 关闭窗口
-                //this.DialogResult = DialogResult.OK;
-                this.Close();
+                if (result == DialogResult.OK)
+                {
+                    // 检查目标文件是否存在
+                    string targetFilePath = System.IO.Path.Combine(Application.StartupPath, "Upgrade.exe");
+                    if (System.IO.File.Exists(targetFilePath))
+                    {
+                        // 使用Process.Start异步启动应用程序
+                        System.Diagnostics.Process.Start(targetFilePath);
+                        this.Close();
+                    }
+                    else
+                    {
+                        MessageBox.Show("更新程序 Upgrade.exe 不存在！",
+                            "错误",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Error);
+                    }
+                }
             }
             catch (Exception ex)
             {
