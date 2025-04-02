@@ -182,12 +182,12 @@ namespace subs_check.win.gui
             {
                 // 获取应用程序目录
                 string executablePath = System.IO.Path.GetDirectoryName(System.Windows.Forms.Application.ExecutablePath);
-                // 创建 upgrade.ini 文件路径
-                string iniFilePath = System.IO.Path.Combine(executablePath, "upgrade.ini");
+                // 创建 Upgrade.ini 文件路径
+                string iniFilePath = System.IO.Path.Combine(executablePath, "Upgrade.ini");
 
                 // 准备 INI 文件内容
                 string iniContent =
-                    "[upgrade]\r\n" +
+                    "[Upgrade]\r\n" +
                     $"DownloadURL={downloadURL}\r\n" +
                     $"TargetFile={downloadEXE}\r\n";
 
