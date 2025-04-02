@@ -61,6 +61,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CheckUpdates.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CheckUpdates.Designer.cs">
+      <DependentUpon>CheckUpdates.cs</DependentUpon>
+    </Compile>
     <Compile Include="EditURLs.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -75,6 +81,9 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="CheckUpdates.resx">
+      <DependentUpon>CheckUpdates.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="EditURLs.resx">
       <DependentUpon>EditURLs.cs</DependentUpon>
     </EmbeddedResource>

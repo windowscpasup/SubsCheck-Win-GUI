@@ -19,7 +19,7 @@ namespace subs_check.win.gui
 {
     public partial class Form1: Form
     {
-        string 版本号;
+        //string 版本号;
         string 标题;
         private Process subsCheckProcess = null;
         string nodeInfo;//进度
@@ -29,6 +29,8 @@ namespace subs_check.win.gui
         string githubProxyURL = "";
         int run = 0;
         string 当前subsCheck版本号 = "未知版本";
+        string 当前GUI版本号 = "未知版本";
+        string 最新GUI版本号 = "未知版本";
         public Form1()
         {
             InitializeComponent();
@@ -162,8 +164,9 @@ namespace subs_check.win.gui
             }
 
             FileVersionInfo myFileVersionInfo = FileVersionInfo.GetVersionInfo(System.Reflection.Assembly.GetExecutingAssembly().Location);
-            版本号 = "v" + myFileVersionInfo.FileVersion;
-            标题 = "SubsCheck Win GUI " + 版本号;
+            当前GUI版本号 = "v" + myFileVersionInfo.FileVersion;
+            最新GUI版本号 = 当前GUI版本号;
+            标题 = "SubsCheck Win GUI " + 当前GUI版本号;
             this.Text = 标题 + " TG:CMLiussss BY:CM喂饭 干货满满";
             comboBox1.Text = "本地";
             comboBox4.Text = "通用订阅";
@@ -206,9 +209,10 @@ namespace subs_check.win.gui
                             JObject json = JObject.Parse(responseBody);
                             string latestVersion = json["tag_name"].ToString();
 
-                            if (latestVersion != 版本号)
+                            if (latestVersion != 当前GUI版本号)
                             {
-                                标题 = "SubsCheck Win GUI " + 版本号 + $"  发现新版本: {latestVersion} 请及时更新！";
+                                最新GUI版本号 = latestVersion;
+                                标题 = "SubsCheck Win GUI " + 当前GUI版本号 + $"  发现新版本: {最新GUI版本号} 请及时更新！";
                                 this.Text = 标题;
                             }
                         }
@@ -788,9 +792,9 @@ namespace subs_check.win.gui
 
                                         // 解压文件
                                         exeEntry.ExtractToFile(exeFilePath);
-
-                                        Log($"subs-check.exe {当前subsCheck版本号} 已就绪！");
                                         当前subsCheck版本号 = latestVersion;
+                                        Log($"subs-check.exe {当前subsCheck版本号} 已就绪！");
+                                        
                                         await SaveConfig(false);
                                         // 这里保留原有行为，不修改button1.Enabled
 
@@ -1777,6 +1781,36 @@ namespace subs_check.win.gui
                 groupBox6.Enabled = false;
                 button1.Text = "停止";
             }
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            // 创建 CheckUpdates 窗口实例
+            CheckUpdates checkUpdatesForm = new CheckUpdates();
+
+            // 传递必要的数据和状态
+            checkUpdatesForm.githubProxys = comboBox3.Items;
+            checkUpdatesForm.githubProxy = comboBox3.Text;
+
+            checkUpdatesForm.当前subsCheck版本号 = 当前subsCheck版本号;
+            checkUpdatesForm.当前GUI版本号 = 当前GUI版本号;
+            checkUpdatesForm.最新GUI版本号 = 最新GUI版本号;
+
+            // 为 CheckUpdates 的 button2 添加点击事件处理程序
+            checkUpdatesForm.FormClosed += (s, args) => {
+                // 移除事件处理，避免内存泄漏
+                if (checkUpdatesForm.DialogResult == DialogResult.OK)
+                {
+                    // 如果返回OK结果，表示按钮被点击并需要更新内核
+                    button5_Click(this, EventArgs.Empty);
+                }
+            };
+
+            // 设置 button2 点击后关闭窗口并返回 DialogResult.OK
+            // 这需要在 CheckUpdates.cs 中修改 button2_Click 方法
+
+            // 显示 CheckUpdates 窗口
+            checkUpdatesForm.ShowDialog();
         }
     }
 }

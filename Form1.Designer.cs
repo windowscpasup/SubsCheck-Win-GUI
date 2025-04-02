@@ -90,6 +90,7 @@
             this.textBox9 = new System.Windows.Forms.TextBox();
             this.label18 = new System.Windows.Forms.Label();
             this.timer3 = new System.Windows.Forms.Timer(this.components);
+            this.button4 = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown6)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown5)).BeginInit();
@@ -463,6 +464,7 @@
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.button5);
             this.groupBox2.Controls.Add(this.richTextBox1);
             this.groupBox2.Location = new System.Drawing.Point(193, 13);
             this.groupBox2.Name = "groupBox2";
@@ -483,11 +485,11 @@
             // 
             // groupBox3
             // 
+            this.groupBox3.Controls.Add(this.button4);
             this.groupBox3.Controls.Add(this.checkBox1);
             this.groupBox3.Controls.Add(this.checkBox2);
             this.groupBox3.Controls.Add(this.comboBox5);
             this.groupBox3.Controls.Add(this.label19);
-            this.groupBox3.Controls.Add(this.button5);
             this.groupBox3.Controls.Add(this.comboBox3);
             this.groupBox3.Controls.Add(this.label10);
             this.groupBox3.Controls.Add(this.comboBox2);
@@ -527,20 +529,19 @@
             // 
             this.comboBox5.FormattingEnabled = true;
             this.comboBox5.Items.AddRange(new object[] {
-            "https://raw.githubusercontent.com/mihomo-party-org/override-hub/main/yaml/布丁狗的订阅转" +
-                "换.yaml",
-            "https://raw.githubusercontent.com/mihomo-party-org/override-hub/main/yaml/ACL4SSR" +
-                "_Online_Full.yaml",
-            "https://raw.githubusercontent.com/mihomo-party-org/override-hub/main/yaml/ACL4SSR" +
-                "_Online_Full_WithIcon.yaml",
-            "https://raw.githubusercontent.com/mihomo-party-org/override-hub/main/yaml/添加直连规则." +
-                "yaml"});
+            "https://cdn.jsdelivr.net/gh/mihomo-party-org/override-hub@main/yaml/布丁狗的订阅转换.yaml" +
+                "",
+            "https://cdn.jsdelivr.net/gh/mihomo-party-org/override-hub@main/yaml/ACL4SSR_Onlin" +
+                "e_Full.yaml",
+            "https://cdn.jsdelivr.net/gh/mihomo-party-org/override-hub@main/yaml/ACL4SSR_Onlin" +
+                "e_Full_WithIcon.yaml",
+            "https://cdn.jsdelivr.net/gh/mihomo-party-org/override-hub@main/yaml/添加直连规则.yaml"});
             this.comboBox5.Location = new System.Drawing.Point(162, 46);
             this.comboBox5.Name = "comboBox5";
             this.comboBox5.Size = new System.Drawing.Size(611, 20);
             this.comboBox5.TabIndex = 24;
-            this.comboBox5.Text = "https://raw.githubusercontent.com/mihomo-party-org/override-hub/main/yaml/布丁狗的订阅转" +
-    "换.yaml";
+            this.comboBox5.Text = "https://cdn.jsdelivr.net/gh/mihomo-party-org/override-hub@main/yaml/布丁狗的订阅转换.yaml" +
+    "";
             // 
             // label19
             // 
@@ -553,12 +554,13 @@
             // 
             // button5
             // 
-            this.button5.Location = new System.Drawing.Point(698, 16);
+            this.button5.Location = new System.Drawing.Point(518, 450);
             this.button5.Name = "button5";
             this.button5.Size = new System.Drawing.Size(75, 23);
             this.button5.TabIndex = 20;
             this.button5.Text = "更新内核";
             this.button5.UseVisualStyleBackColor = true;
+            this.button5.Visible = false;
             this.button5.Click += new System.EventHandler(this.button5_Click);
             // 
             // comboBox3
@@ -1055,6 +1057,16 @@
             this.timer3.Interval = 86400000;
             this.timer3.Tick += new System.EventHandler(this.timer3_Tick);
             // 
+            // button4
+            // 
+            this.button4.Location = new System.Drawing.Point(698, 16);
+            this.button4.Name = "button4";
+            this.button4.Size = new System.Drawing.Size(75, 23);
+            this.button4.TabIndex = 26;
+            this.button4.Text = "检查更新";
+            this.button4.UseVisualStyleBackColor = true;
+            this.button4.Click += new System.EventHandler(this.button4_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -1157,6 +1169,7 @@
         private System.Windows.Forms.ComboBox comboBox5;
         private System.Windows.Forms.CheckBox checkBox2;
         private System.Windows.Forms.Timer timer3;
+        private System.Windows.Forms.Button button4;
     }
 }
 
