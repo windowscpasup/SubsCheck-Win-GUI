@@ -38,11 +38,18 @@
 - **gist**：将结果保存到 github gist [配置方法](https://github.com/beck-8/subs-check/blob/master/doc/gist.md)
 - **webdav**：将结果保存到 webdav 服务器 [配置方法](https://github.com/beck-8/subs-check/blob/master/doc/webdav.md)
 
+## 📦 关于 Github Proxy
+- **Github Proxy**：本项目使用了 `Github Proxy` 来加速 GUI 必要内容的加载。
+> [!Tip]
+> 你也可以通过 https://github.com/cmliu/CF-Workers-GitHub 项目来搭建自己专属的 **Github Proxy**。
+
 ## 📁 GUI 文件结构
 ```shell
 subs-check.win.gui.exe      # GUI本体
 subs-check.exe              # subs-check x86_32位 内核本体  
 subs-check_Windows_i386.zip # subs-check x86_32位 内核压缩包  
+Upgrade.exe                 # 升级程序
+Upgrade.ini                 # 升级配置文件
 config
  └─ config.yaml             # subs-check 配置文件  
 output
