@@ -76,8 +76,18 @@ namespace subs_check.win.gui
 
             if (最新GUI版本号 != 当前GUI版本号)
             {
-                button1.Text = "立即更新";
-                button1.Enabled = true;
+                // 检查当前目录下是否存在 Upgrade.exe
+                string upgradeExePath = System.IO.Path.Combine(Application.StartupPath, "Upgrade.exe");
+                if (System.IO.File.Exists(upgradeExePath))
+                {
+                    button1.Text = "立即更新";
+                    button1.Enabled = true;
+                }
+                else
+                {
+                    button1.Text = "缺少更新程序";
+                    button1.Enabled = false;
+                }
             }
             else
             {
