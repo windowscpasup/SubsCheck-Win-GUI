@@ -56,6 +56,9 @@ namespace subs_check.win.gui
             
             toolTip1.SetToolTip(comboBox4, "通用订阅：内置了Sub-Store程序，自适应订阅格式。\nClash订阅：带规则的 Mihomo、Clash 订阅格式。");
             toolTip1.SetToolTip(comboBox5, "生成带规则的 Clash 订阅所需的覆写规则文件");
+
+            toolTip1.SetToolTip(checkBox3, "保存几个成功的节点，不选代表不限制，内核版本需要 v2.1.0 以上\n如果你的并发数量超过这个参数，那么成功的结果可能会大于这个数值");
+            toolTip1.SetToolTip(numericUpDown8, "保存几个成功的节点，不选代表不限制，内核版本需要 v2.1.0 以上\n如果你的并发数量超过这个参数，那么成功的结果可能会大于这个数值");
             // 设置通知图标的上下文菜单
             SetupNotifyIconContextMenu();
         }
@@ -244,7 +247,7 @@ namespace subs_check.win.gui
             }
         }
 
-        private void ReadConfig()//读取配置文件
+        private async void ReadConfig()//读取配置文件
         {
             try
             {
@@ -332,7 +335,20 @@ namespace subs_check.win.gui
                     int mihomoOverwriteUrlIndex = mihomoOverwriteUrl.IndexOf(githubRawPrefix);
                     if (mihomoOverwriteUrl != null) 
                     {
-                        if (mihomoOverwriteUrlIndex > 0) comboBox5.Text = mihomoOverwriteUrl.Substring(mihomoOverwriteUrlIndex);
+                        if (mihomoOverwriteUrl.Contains("http://127.0.0")) 
+                        {
+                            if (mihomoOverwriteUrl.EndsWith("bdg.yaml", StringComparison.OrdinalIgnoreCase))
+                            {
+                                comboBox5.Text = "[内置]布丁狗的订阅转换";
+                                await ProcessComboBox5Selection();
+                            }
+                            else if (mihomoOverwriteUrl.EndsWith("ACL4SSR_Online_Full.yaml", StringComparison.OrdinalIgnoreCase)) 
+                            {
+                                comboBox5.Text = "[内置]ACL4SSR_Online_Full";
+                                await ProcessComboBox5Selection();
+                            }
+                        } 
+                        else if (mihomoOverwriteUrlIndex > 0) comboBox5.Text = mihomoOverwriteUrl.Substring(mihomoOverwriteUrlIndex);
                         else comboBox5.Text = mihomoOverwriteUrl;
                     } 
 
@@ -398,6 +414,22 @@ namespace subs_check.win.gui
 
                     string subscheckversion = 读取config字符串(config, "subscheck-version");
                     if (subscheckversion != null) 当前subsCheck版本号 = subscheckversion;
+
+                    int? successlimit = 读取config整数(config, "success-limit");
+                    if (successlimit.HasValue) 
+                    {
+                        if (successlimit.Value == 0)
+                        {
+                            checkBox3.Checked = false;
+                            numericUpDown8.Enabled = false;
+                        }
+                        else
+                        {
+                            checkBox3.Checked = true;
+                            numericUpDown8.Enabled = true;
+                            numericUpDown8.Value = successlimit.Value;
+                        }   
+                    }
                 }
             }
             catch (Exception ex)
@@ -517,7 +549,13 @@ namespace subs_check.win.gui
 
                 // 保存sub-urls列表
                 List<string> subUrls = new List<string>();
-                // 只有在textBox1有内容时添加
+                string allyamlFilePath = System.IO.Path.Combine(executablePath, "output", "all.yaml");
+                if (System.IO.File.Exists(allyamlFilePath))
+                {
+                    subUrls.Add($"http://127.0.0.1:{numericUpDown6.Value}/all.yaml");
+                    Log("已加载上次测试结果。");
+                }
+
                 if (!string.IsNullOrEmpty(textBox1.Text))
                 {
                     subUrls.AddRange(textBox1.Text.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries).ToList());
@@ -532,16 +570,53 @@ namespace subs_check.win.gui
                     }
                 }
 
-                subUrls.Add($"http://127.0.0.1:{numericUpDown6.Value}/all.yaml");
-                string allyamlFilePath = System.IO.Path.Combine(executablePath, "output", "all.yaml");
-                if (System.IO.File.Exists(allyamlFilePath))
-                {
-                    Log("已加载上次测试结果。");
-                }
                 config["sub-urls"] = subUrls;
 
-                //Clash订阅 覆写配置文件
-                if (comboBox5.Text.StartsWith(githubRawPrefix)) config["mihomo-overwrite-url"] = githubProxyURL + comboBox5.Text;
+                // 处理配置文件下载与配置
+                if (comboBox5.Text.Contains("[内置]"))
+                {
+                    // 确定文件名和下载URL
+                    string fileName;
+                    string downloadFilePath;
+                    string downloadUrl;
+                    string displayName;
+
+                    if (comboBox5.Text.Contains("[内置]布丁狗"))
+                    {
+                        fileName = "bdg.yaml";
+                        displayName = "[内置]布丁狗的订阅转换";
+                        downloadUrl = "https://raw.githubusercontent.com/mihomo-party-org/override-hub/main/yaml/%E5%B8%83%E4%B8%81%E7%8B%97%E7%9A%84%E8%AE%A2%E9%98%85%E8%BD%AC%E6%8D%A2.yaml";
+                    }
+                    else // [内置]ACL4SSR
+                    {
+                        fileName = "ACL4SSR_Online_Full.yaml";
+                        displayName = "[内置]ACL4SSR_Online_Full";
+                        downloadUrl = "https://raw.githubusercontent.com/mihomo-party-org/override-hub/main/yaml/ACL4SSR_Online_Full.yaml";
+                    }
+
+                    // 确保output文件夹存在
+                    string outputFolderPath = Path.Combine(executablePath, "output");
+                    if (!Directory.Exists(outputFolderPath))
+                    {
+                        Directory.CreateDirectory(outputFolderPath);
+                    }
+
+                    // 确定文件完整路径
+                    downloadFilePath = Path.Combine(outputFolderPath, fileName);
+
+                    // 检查文件是否存在
+                    if (!File.Exists(downloadFilePath))
+                    {
+                        Log($"{displayName} 覆写配置文件 未找到，将使用在线版本。");
+                        config["mihomo-overwrite-url"] = githubProxyURL + downloadUrl;
+                    }
+                    else
+                    {
+                        Log($"{displayName} 覆写配置文件 加载成功。");
+                        config["mihomo-overwrite-url"] = $"http://127.0.0.1:{numericUpDown6.Value}/{fileName}";
+                    }
+                }
+                else if (comboBox5.Text.StartsWith(githubRawPrefix)) config["mihomo-overwrite-url"] = githubProxyURL + comboBox5.Text;
                 else config["mihomo-overwrite-url"] = comboBox5.Text;
 
                 config["rename-node"] = checkBox1.Checked;//以节点IP查询位置重命名节点
@@ -550,6 +625,10 @@ namespace subs_check.win.gui
                 config["print-progress"] = true;//是否显示进度
                 config["sub-urls-retry"] = 3;//重试次数(获取订阅失败后重试次数)
                 config["subscheck-version"] = 当前subsCheck版本号;//当前subsCheck版本号
+
+                //保存几个成功的节点，为0代表不限制 
+                if (checkBox3.Checked) config["success-limit"] = (int)numericUpDown8.Value;
+                else config["success-limit"] = 0;
 
                 // 使用YamlDotNet序列化配置
                 var serializer = new YamlDotNet.Serialization.SerializerBuilder()
@@ -1820,6 +1899,92 @@ namespace subs_check.win.gui
 
             // 显示 CheckUpdates 窗口
             checkUpdatesForm.ShowDialog();
+        }
+
+        private void checkBox3_CheckedChanged(object sender, EventArgs e)
+        {
+            if (checkBox3.Checked) numericUpDown8.Enabled = true;
+            else numericUpDown8.Enabled = false;
+        }
+
+        private async void comboBox5_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            await ProcessComboBox5Selection();
+        }
+
+        private async Task ProcessComboBox5Selection()
+        {
+            if (comboBox5.Text.Contains("[内置]"))
+            {
+                // 确定文件名和下载URL
+                string fileName;
+                string downloadFilePath;
+                string downloadUrl;
+                string displayName;
+                string executablePath = Path.GetDirectoryName(System.Windows.Forms.Application.ExecutablePath);
+                if (comboBox5.Text.Contains("[内置]布丁狗"))
+                {
+                    fileName = "bdg.yaml";
+                    displayName = "[内置]布丁狗的订阅转换";
+                    downloadUrl = "https://raw.githubusercontent.com/mihomo-party-org/override-hub/main/yaml/%E5%B8%83%E4%B8%81%E7%8B%97%E7%9A%84%E8%AE%A2%E9%98%85%E8%BD%AC%E6%8D%A2.yaml";
+                }
+                else // [内置]ACL4SSR
+                {
+                    fileName = "ACL4SSR_Online_Full.yaml";
+                    displayName = "[内置]ACL4SSR_Online_Full";
+                    downloadUrl = "https://raw.githubusercontent.com/mihomo-party-org/override-hub/main/yaml/ACL4SSR_Online_Full.yaml";
+                }
+
+                // 确保output文件夹存在
+                string outputFolderPath = Path.Combine(executablePath, "output");
+                if (!Directory.Exists(outputFolderPath))
+                {
+                    Directory.CreateDirectory(outputFolderPath);
+                }
+
+                // 确定文件完整路径
+                downloadFilePath = Path.Combine(outputFolderPath, fileName);
+
+                // 检查文件是否存在
+                if (!File.Exists(downloadFilePath))
+                {
+                    Log($"{displayName} 覆写配置文件 未找到，正在下载...");
+
+                    // 添加GitHub代理前缀如果有
+                    string fullDownloadUrl = githubProxyURL + downloadUrl;
+
+                    try
+                    {
+                        // 创建不使用系统代理的HttpClientHandler
+                        using (HttpClientHandler handler = new HttpClientHandler { UseProxy = false, Proxy = null })
+                        using (HttpClient client = new HttpClient(handler))
+                        {
+                            client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win32; x86) AppleWebKit/537.36 (KHTML, like Gecko) cmliu/SubsCheck-Win-GUI");
+                            client.Timeout = TimeSpan.FromSeconds(15); // 设置15秒超时
+
+                            // 下载文件内容
+                            HttpResponseMessage response = await client.GetAsync(fullDownloadUrl);
+
+                            if (response.IsSuccessStatusCode)
+                            {
+                                // 获取响应内容并写入文件
+                                string fileContent = await response.Content.ReadAsStringAsync();
+                                File.WriteAllText(downloadFilePath, fileContent, Encoding.UTF8);
+
+                                Log($"{displayName} 覆写配置文件 下载成功");
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Log($"{displayName} 覆写配置文件 下载失败: {ex.Message}", true);
+                    }
+                }
+                else
+                {
+                    Log($"{displayName} 覆写配置文件 已就绪。");
+                }
+            }
         }
     }
 }

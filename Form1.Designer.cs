@@ -56,13 +56,14 @@
             this.label20 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.button5 = new System.Windows.Forms.Button();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.button4 = new System.Windows.Forms.Button();
             this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.checkBox2 = new System.Windows.Forms.CheckBox();
             this.comboBox5 = new System.Windows.Forms.ComboBox();
             this.label19 = new System.Windows.Forms.Label();
-            this.button5 = new System.Windows.Forms.Button();
             this.comboBox3 = new System.Windows.Forms.ComboBox();
             this.label10 = new System.Windows.Forms.Label();
             this.comboBox2 = new System.Windows.Forms.ComboBox();
@@ -90,7 +91,8 @@
             this.textBox9 = new System.Windows.Forms.TextBox();
             this.label18 = new System.Windows.Forms.Label();
             this.timer3 = new System.Windows.Forms.Timer(this.components);
-            this.button4 = new System.Windows.Forms.Button();
+            this.checkBox3 = new System.Windows.Forms.CheckBox();
+            this.numericUpDown8 = new System.Windows.Forms.NumericUpDown();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown6)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown5)).BeginInit();
@@ -104,6 +106,7 @@
             this.groupBox4.SuspendLayout();
             this.groupBox5.SuspendLayout();
             this.groupBox6.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown8)).BeginInit();
             this.SuspendLayout();
             // 
             // notifyIcon1
@@ -473,6 +476,17 @@
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "实时日志";
             // 
+            // button5
+            // 
+            this.button5.Location = new System.Drawing.Point(518, 450);
+            this.button5.Name = "button5";
+            this.button5.Size = new System.Drawing.Size(75, 23);
+            this.button5.TabIndex = 20;
+            this.button5.Text = "更新内核";
+            this.button5.UseVisualStyleBackColor = true;
+            this.button5.Visible = false;
+            this.button5.Click += new System.EventHandler(this.button5_Click);
+            // 
             // richTextBox1
             // 
             this.richTextBox1.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -485,6 +499,8 @@
             // 
             // groupBox3
             // 
+            this.groupBox3.Controls.Add(this.numericUpDown8);
+            this.groupBox3.Controls.Add(this.checkBox3);
             this.groupBox3.Controls.Add(this.button4);
             this.groupBox3.Controls.Add(this.checkBox1);
             this.groupBox3.Controls.Add(this.checkBox2);
@@ -500,6 +516,16 @@
             this.groupBox3.TabIndex = 2;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "高级设置";
+            // 
+            // button4
+            // 
+            this.button4.Location = new System.Drawing.Point(698, 16);
+            this.button4.Name = "button4";
+            this.button4.Size = new System.Drawing.Size(75, 23);
+            this.button4.TabIndex = 26;
+            this.button4.Text = "检查更新";
+            this.button4.UseVisualStyleBackColor = true;
+            this.button4.Click += new System.EventHandler(this.button4_Click);
             // 
             // checkBox1
             // 
@@ -529,39 +555,31 @@
             // 
             this.comboBox5.FormattingEnabled = true;
             this.comboBox5.Items.AddRange(new object[] {
-            "https://cdn.jsdelivr.net/gh/mihomo-party-org/override-hub@main/yaml/布丁狗的订阅转换.yaml" +
-                "",
-            "https://cdn.jsdelivr.net/gh/mihomo-party-org/override-hub@main/yaml/ACL4SSR_Onlin" +
-                "e_Full.yaml",
-            "https://cdn.jsdelivr.net/gh/mihomo-party-org/override-hub@main/yaml/ACL4SSR_Onlin" +
-                "e_Full_WithIcon.yaml",
-            "https://cdn.jsdelivr.net/gh/mihomo-party-org/override-hub@main/yaml/添加直连规则.yaml"});
-            this.comboBox5.Location = new System.Drawing.Point(162, 46);
+            "[内置]布丁狗的订阅转换",
+            "[内置]ACL4SSR_Online_Full",
+            "https://fastly.jsdelivr.net/gh/mihomo-party-org/override-hub@main/yaml/布丁狗的订阅转换.y" +
+                "aml",
+            "https://fastly.jsdelivr.net/gh/mihomo-party-org/override-hub@main/yaml/ACL4SSR_On" +
+                "line_Full.yaml",
+            "https://fastly.jsdelivr.net/gh/mihomo-party-org/override-hub@main/yaml/ACL4SSR_On" +
+                "line_Full_WithIcon.yaml",
+            "https://fastly.jsdelivr.net/gh/mihomo-party-org/override-hub@main/yaml/添加直连规则.yam" +
+                "l"});
+            this.comboBox5.Location = new System.Drawing.Point(326, 46);
             this.comboBox5.Name = "comboBox5";
-            this.comboBox5.Size = new System.Drawing.Size(611, 20);
+            this.comboBox5.Size = new System.Drawing.Size(447, 20);
             this.comboBox5.TabIndex = 24;
-            this.comboBox5.Text = "https://cdn.jsdelivr.net/gh/mihomo-party-org/override-hub@main/yaml/布丁狗的订阅转换.yaml" +
-    "";
+            this.comboBox5.Text = "[内置]布丁狗的订阅转换";
+            this.comboBox5.SelectedIndexChanged += new System.EventHandler(this.comboBox5_SelectedIndexChanged);
             // 
             // label19
             // 
             this.label19.AutoSize = true;
-            this.label19.Location = new System.Drawing.Point(11, 48);
+            this.label19.Location = new System.Drawing.Point(181, 49);
             this.label19.Name = "label19";
             this.label19.Size = new System.Drawing.Size(149, 12);
             this.label19.TabIndex = 23;
             this.label19.Text = "Clash订阅 覆写配置文件：";
-            // 
-            // button5
-            // 
-            this.button5.Location = new System.Drawing.Point(518, 450);
-            this.button5.Name = "button5";
-            this.button5.Size = new System.Drawing.Size(75, 23);
-            this.button5.TabIndex = 20;
-            this.button5.Text = "更新内核";
-            this.button5.UseVisualStyleBackColor = true;
-            this.button5.Visible = false;
-            this.button5.Click += new System.EventHandler(this.button5_Click);
             // 
             // comboBox3
             // 
@@ -828,7 +846,7 @@
                 "p.zip",
             "https://github.com/VSCodium/vscodium/releases/download/1.98.0.25067/codium-1.98.0" +
                 ".25067-el9.aarch64.rpm"});
-            this.comboBox2.Location = new System.Drawing.Point(478, 18);
+            this.comboBox2.Location = new System.Drawing.Point(472, 18);
             this.comboBox2.Name = "comboBox2";
             this.comboBox2.Size = new System.Drawing.Size(214, 20);
             this.comboBox2.TabIndex = 19;
@@ -1057,15 +1075,39 @@
             this.timer3.Interval = 86400000;
             this.timer3.Tick += new System.EventHandler(this.timer3_Tick);
             // 
-            // button4
+            // checkBox3
             // 
-            this.button4.Location = new System.Drawing.Point(698, 16);
-            this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(75, 23);
-            this.button4.TabIndex = 26;
-            this.button4.Text = "检查更新";
-            this.button4.UseVisualStyleBackColor = true;
-            this.button4.Click += new System.EventHandler(this.button4_Click);
+            this.checkBox3.AutoSize = true;
+            this.checkBox3.Location = new System.Drawing.Point(9, 48);
+            this.checkBox3.Name = "checkBox3";
+            this.checkBox3.Size = new System.Drawing.Size(108, 16);
+            this.checkBox3.TabIndex = 27;
+            this.checkBox3.Text = "节点保存数目：";
+            this.checkBox3.UseVisualStyleBackColor = true;
+            this.checkBox3.CheckedChanged += new System.EventHandler(this.checkBox3_CheckedChanged);
+            // 
+            // numericUpDown8
+            // 
+            this.numericUpDown8.Enabled = false;
+            this.numericUpDown8.Location = new System.Drawing.Point(110, 47);
+            this.numericUpDown8.Maximum = new decimal(new int[] {
+            65535,
+            0,
+            0,
+            0});
+            this.numericUpDown8.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.numericUpDown8.Name = "numericUpDown8";
+            this.numericUpDown8.Size = new System.Drawing.Size(58, 21);
+            this.numericUpDown8.TabIndex = 22;
+            this.numericUpDown8.Value = new decimal(new int[] {
+            100,
+            0,
+            0,
+            0});
             // 
             // Form1
             // 
@@ -1103,6 +1145,7 @@
             this.groupBox5.PerformLayout();
             this.groupBox6.ResumeLayout(false);
             this.groupBox6.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown8)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -1170,6 +1213,8 @@
         private System.Windows.Forms.CheckBox checkBox2;
         private System.Windows.Forms.Timer timer3;
         private System.Windows.Forms.Button button4;
+        private System.Windows.Forms.NumericUpDown numericUpDown8;
+        private System.Windows.Forms.CheckBox checkBox3;
     }
 }
 
