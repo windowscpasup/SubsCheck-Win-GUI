@@ -59,6 +59,8 @@
             this.button5 = new System.Windows.Forms.Button();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.numericUpDown8 = new System.Windows.Forms.NumericUpDown();
+            this.checkBox3 = new System.Windows.Forms.CheckBox();
             this.button4 = new System.Windows.Forms.Button();
             this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.checkBox2 = new System.Windows.Forms.CheckBox();
@@ -91,8 +93,6 @@
             this.textBox9 = new System.Windows.Forms.TextBox();
             this.label18 = new System.Windows.Forms.Label();
             this.timer3 = new System.Windows.Forms.Timer(this.components);
-            this.checkBox3 = new System.Windows.Forms.CheckBox();
-            this.numericUpDown8 = new System.Windows.Forms.NumericUpDown();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown6)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown5)).BeginInit();
@@ -103,10 +103,10 @@
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown7)).BeginInit();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown8)).BeginInit();
             this.groupBox4.SuspendLayout();
             this.groupBox5.SuspendLayout();
             this.groupBox6.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown8)).BeginInit();
             this.SuspendLayout();
             // 
             // notifyIcon1
@@ -128,23 +128,17 @@
             this.groupBox1.Controls.Add(this.button3);
             this.groupBox1.Controls.Add(this.textBox1);
             this.groupBox1.Controls.Add(this.comboBox1);
-            this.groupBox1.Controls.Add(this.numericUpDown6);
-            this.groupBox1.Controls.Add(this.numericUpDown5);
             this.groupBox1.Controls.Add(this.numericUpDown4);
             this.groupBox1.Controls.Add(this.numericUpDown3);
             this.groupBox1.Controls.Add(this.numericUpDown2);
             this.groupBox1.Controls.Add(this.numericUpDown1);
             this.groupBox1.Controls.Add(this.label7);
-            this.groupBox1.Controls.Add(this.label4);
-            this.groupBox1.Controls.Add(this.label5);
             this.groupBox1.Controls.Add(this.label6);
             this.groupBox1.Controls.Add(this.label3);
             this.groupBox1.Controls.Add(this.label2);
             this.groupBox1.Controls.Add(this.label1);
             this.groupBox1.Controls.Add(this.button2);
             this.groupBox1.Controls.Add(this.button1);
-            this.groupBox1.Controls.Add(this.numericUpDown7);
-            this.groupBox1.Controls.Add(this.label20);
             this.groupBox1.Controls.Add(this.label8);
             this.groupBox1.Location = new System.Drawing.Point(13, 13);
             this.groupBox1.Name = "groupBox1";
@@ -179,11 +173,11 @@
             // textBox1
             // 
             this.textBox1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.textBox1.Location = new System.Drawing.Point(9, 257);
+            this.textBox1.Location = new System.Drawing.Point(9, 179);
             this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
             this.textBox1.ReadOnly = true;
-            this.textBox1.Size = new System.Drawing.Size(154, 158);
+            this.textBox1.Size = new System.Drawing.Size(154, 236);
             this.textBox1.TabIndex = 17;
             this.textBox1.Text = resources.GetString("textBox1.Text");
             this.textBox1.WordWrap = false;
@@ -199,7 +193,7 @@
             "gist",
             "r2",
             "webdav"});
-            this.comboBox1.Location = new System.Drawing.Point(105, 214);
+            this.comboBox1.Location = new System.Drawing.Point(105, 135);
             this.comboBox1.Name = "comboBox1";
             this.comboBox1.Size = new System.Drawing.Size(58, 20);
             this.comboBox1.TabIndex = 16;
@@ -207,7 +201,7 @@
             // 
             // numericUpDown6
             // 
-            this.numericUpDown6.Location = new System.Drawing.Point(105, 158);
+            this.numericUpDown6.Location = new System.Drawing.Point(281, 19);
             this.numericUpDown6.Maximum = new decimal(new int[] {
             65535,
             0,
@@ -226,12 +220,11 @@
             0,
             0,
             0});
-            this.numericUpDown6.Visible = false;
             this.numericUpDown6.ValueChanged += new System.EventHandler(this.numericUpDown6_ValueChanged);
             // 
             // numericUpDown5
             // 
-            this.numericUpDown5.Location = new System.Drawing.Point(105, 130);
+            this.numericUpDown5.Location = new System.Drawing.Point(281, 45);
             this.numericUpDown5.Maximum = new decimal(new int[] {
             10,
             0,
@@ -250,11 +243,10 @@
             0,
             0,
             0});
-            this.numericUpDown5.Visible = false;
             // 
             // numericUpDown4
             // 
-            this.numericUpDown4.Location = new System.Drawing.Point(105, 102);
+            this.numericUpDown4.Location = new System.Drawing.Point(105, 106);
             this.numericUpDown4.Maximum = new decimal(new int[] {
             10240,
             0,
@@ -276,7 +268,7 @@
             // 
             // numericUpDown3
             // 
-            this.numericUpDown3.Location = new System.Drawing.Point(105, 75);
+            this.numericUpDown3.Location = new System.Drawing.Point(105, 77);
             this.numericUpDown3.Maximum = new decimal(new int[] {
             10000,
             0,
@@ -298,7 +290,7 @@
             // 
             // numericUpDown2
             // 
-            this.numericUpDown2.Location = new System.Drawing.Point(105, 47);
+            this.numericUpDown2.Location = new System.Drawing.Point(105, 48);
             this.numericUpDown2.Maximum = new decimal(new int[] {
             1440,
             0,
@@ -338,7 +330,7 @@
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(7, 217);
+            this.label7.Location = new System.Drawing.Point(7, 137);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(65, 12);
             this.label7.TabIndex = 8;
@@ -347,27 +339,25 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(7, 161);
+            this.label4.Location = new System.Drawing.Point(191, 21);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(89, 12);
             this.label4.TabIndex = 7;
             this.label4.Text = "HTTP服务端口：";
-            this.label4.Visible = false;
             // 
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(7, 133);
+            this.label5.Location = new System.Drawing.Point(191, 48);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(89, 12);
             this.label5.TabIndex = 6;
             this.label5.Text = "测速时间(秒)：";
-            this.label5.Visible = false;
             // 
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(7, 105);
+            this.label6.Location = new System.Drawing.Point(7, 108);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(101, 12);
             this.label6.TabIndex = 5;
@@ -376,7 +366,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(7, 77);
+            this.label3.Location = new System.Drawing.Point(7, 79);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(101, 12);
             this.label3.TabIndex = 4;
@@ -385,7 +375,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(7, 49);
+            this.label2.Location = new System.Drawing.Point(7, 50);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(101, 12);
             this.label2.TabIndex = 3;
@@ -423,7 +413,7 @@
             // 
             // numericUpDown7
             // 
-            this.numericUpDown7.Location = new System.Drawing.Point(105, 186);
+            this.numericUpDown7.Location = new System.Drawing.Point(441, 19);
             this.numericUpDown7.Maximum = new decimal(new int[] {
             65535,
             0,
@@ -442,23 +432,21 @@
             0,
             0,
             0});
-            this.numericUpDown7.Visible = false;
             this.numericUpDown7.ValueChanged += new System.EventHandler(this.numericUpDown6_ValueChanged);
             // 
             // label20
             // 
             this.label20.AutoSize = true;
-            this.label20.Location = new System.Drawing.Point(7, 189);
+            this.label20.Location = new System.Drawing.Point(345, 21);
             this.label20.Name = "label20";
             this.label20.Size = new System.Drawing.Size(95, 12);
             this.label20.TabIndex = 20;
             this.label20.Text = "Sub-Store端口：";
-            this.label20.Visible = false;
             // 
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(7, 242);
+            this.label8.Location = new System.Drawing.Point(7, 164);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(161, 12);
             this.label8.TabIndex = 9;
@@ -478,7 +466,7 @@
             // 
             // button5
             // 
-            this.button5.Location = new System.Drawing.Point(518, 450);
+            this.button5.Location = new System.Drawing.Point(515, 450);
             this.button5.Name = "button5";
             this.button5.Size = new System.Drawing.Size(75, 23);
             this.button5.TabIndex = 20;
@@ -503,23 +491,63 @@
             this.groupBox3.Controls.Add(this.checkBox3);
             this.groupBox3.Controls.Add(this.button4);
             this.groupBox3.Controls.Add(this.checkBox1);
+            this.groupBox3.Controls.Add(this.numericUpDown6);
             this.groupBox3.Controls.Add(this.checkBox2);
+            this.groupBox3.Controls.Add(this.numericUpDown5);
             this.groupBox3.Controls.Add(this.comboBox5);
             this.groupBox3.Controls.Add(this.label19);
             this.groupBox3.Controls.Add(this.comboBox3);
             this.groupBox3.Controls.Add(this.label10);
+            this.groupBox3.Controls.Add(this.label4);
             this.groupBox3.Controls.Add(this.comboBox2);
             this.groupBox3.Controls.Add(this.label9);
+            this.groupBox3.Controls.Add(this.label5);
+            this.groupBox3.Controls.Add(this.numericUpDown7);
+            this.groupBox3.Controls.Add(this.label20);
             this.groupBox3.Location = new System.Drawing.Point(13, 503);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(780, 79);
+            this.groupBox3.Size = new System.Drawing.Size(780, 106);
             this.groupBox3.TabIndex = 2;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "高级设置";
             // 
+            // numericUpDown8
+            // 
+            this.numericUpDown8.Enabled = false;
+            this.numericUpDown8.Location = new System.Drawing.Point(122, 45);
+            this.numericUpDown8.Maximum = new decimal(new int[] {
+            65535,
+            0,
+            0,
+            0});
+            this.numericUpDown8.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.numericUpDown8.Name = "numericUpDown8";
+            this.numericUpDown8.Size = new System.Drawing.Size(58, 21);
+            this.numericUpDown8.TabIndex = 22;
+            this.numericUpDown8.Value = new decimal(new int[] {
+            100,
+            0,
+            0,
+            0});
+            // 
+            // checkBox3
+            // 
+            this.checkBox3.AutoSize = true;
+            this.checkBox3.Location = new System.Drawing.Point(9, 48);
+            this.checkBox3.Name = "checkBox3";
+            this.checkBox3.Size = new System.Drawing.Size(108, 16);
+            this.checkBox3.TabIndex = 27;
+            this.checkBox3.Text = "节点保存数目：";
+            this.checkBox3.UseVisualStyleBackColor = true;
+            this.checkBox3.CheckedChanged += new System.EventHandler(this.checkBox3_CheckedChanged);
+            // 
             // button4
             // 
-            this.button4.Location = new System.Drawing.Point(698, 16);
+            this.button4.Location = new System.Drawing.Point(695, 71);
             this.button4.Name = "button4";
             this.button4.Size = new System.Drawing.Size(75, 23);
             this.button4.TabIndex = 26;
@@ -543,7 +571,7 @@
             // checkBox2
             // 
             this.checkBox2.AutoSize = true;
-            this.checkBox2.Location = new System.Drawing.Point(105, 20);
+            this.checkBox2.Location = new System.Drawing.Point(106, 20);
             this.checkBox2.Name = "checkBox2";
             this.checkBox2.Size = new System.Drawing.Size(84, 16);
             this.checkBox2.TabIndex = 25;
@@ -565,9 +593,9 @@
                 "line_Full_WithIcon.yaml",
             "https://fastly.jsdelivr.net/gh/mihomo-party-org/override-hub@main/yaml/添加直连规则.yam" +
                 "l"});
-            this.comboBox5.Location = new System.Drawing.Point(326, 46);
+            this.comboBox5.Location = new System.Drawing.Point(152, 73);
             this.comboBox5.Name = "comboBox5";
-            this.comboBox5.Size = new System.Drawing.Size(447, 20);
+            this.comboBox5.Size = new System.Drawing.Size(538, 20);
             this.comboBox5.TabIndex = 24;
             this.comboBox5.Text = "[内置]布丁狗的订阅转换";
             this.comboBox5.SelectedIndexChanged += new System.EventHandler(this.comboBox5_SelectedIndexChanged);
@@ -575,7 +603,7 @@
             // label19
             // 
             this.label19.AutoSize = true;
-            this.label19.Location = new System.Drawing.Point(181, 49);
+            this.label19.Location = new System.Drawing.Point(7, 76);
             this.label19.Name = "label19";
             this.label19.Size = new System.Drawing.Size(149, 12);
             this.label19.TabIndex = 23;
@@ -820,9 +848,9 @@
             "t.992699.xyz",
             "tube.20140301.xyz",
             "wfgithub.xiaonuomi.ie.eu.org"});
-            this.comboBox3.Location = new System.Drawing.Point(281, 18);
+            this.comboBox3.Location = new System.Drawing.Point(590, 19);
             this.comboBox3.Name = "comboBox3";
-            this.comboBox3.Size = new System.Drawing.Size(120, 20);
+            this.comboBox3.Size = new System.Drawing.Size(180, 20);
             this.comboBox3.TabIndex = 21;
             this.comboBox3.Text = "自动选择";
             this.comboBox3.Leave += new System.EventHandler(this.comboBox3_Leave);
@@ -830,7 +858,7 @@
             // label10
             // 
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(195, 21);
+            this.label10.Location = new System.Drawing.Point(500, 21);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(89, 12);
             this.label10.TabIndex = 20;
@@ -846,9 +874,9 @@
                 "p.zip",
             "https://github.com/VSCodium/vscodium/releases/download/1.98.0.25067/codium-1.98.0" +
                 ".25067-el9.aarch64.rpm"});
-            this.comboBox2.Location = new System.Drawing.Point(472, 18);
+            this.comboBox2.Location = new System.Drawing.Point(414, 45);
             this.comboBox2.Name = "comboBox2";
-            this.comboBox2.Size = new System.Drawing.Size(214, 20);
+            this.comboBox2.Size = new System.Drawing.Size(356, 20);
             this.comboBox2.TabIndex = 19;
             this.comboBox2.Text = "https://github.com/AaronFeng753/Waifu2x-Extension-GUI/releases/download/v2.21.12/" +
     "Waifu2x-Extension-GUI-v2.21.12-Portable.7z";
@@ -856,7 +884,7 @@
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(407, 21);
+            this.label9.Location = new System.Drawing.Point(344, 48);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(65, 12);
             this.label9.TabIndex = 18;
@@ -882,7 +910,7 @@
             this.groupBox4.Controls.Add(this.label12);
             this.groupBox4.Controls.Add(this.textBox2);
             this.groupBox4.Controls.Add(this.label11);
-            this.groupBox4.Location = new System.Drawing.Point(13, 588);
+            this.groupBox4.Location = new System.Drawing.Point(13, 615);
             this.groupBox4.Name = "groupBox4";
             this.groupBox4.Size = new System.Drawing.Size(780, 51);
             this.groupBox4.TabIndex = 4;
@@ -954,7 +982,7 @@
             this.groupBox5.Controls.Add(this.label15);
             this.groupBox5.Controls.Add(this.textBox7);
             this.groupBox5.Controls.Add(this.label16);
-            this.groupBox5.Location = new System.Drawing.Point(13, 645);
+            this.groupBox5.Location = new System.Drawing.Point(13, 672);
             this.groupBox5.Name = "groupBox5";
             this.groupBox5.Size = new System.Drawing.Size(780, 51);
             this.groupBox5.TabIndex = 6;
@@ -1008,7 +1036,7 @@
             this.groupBox6.Controls.Add(this.label17);
             this.groupBox6.Controls.Add(this.textBox9);
             this.groupBox6.Controls.Add(this.label18);
-            this.groupBox6.Location = new System.Drawing.Point(13, 702);
+            this.groupBox6.Location = new System.Drawing.Point(13, 729);
             this.groupBox6.Name = "groupBox6";
             this.groupBox6.Size = new System.Drawing.Size(780, 51);
             this.groupBox6.TabIndex = 6;
@@ -1075,47 +1103,13 @@
             this.timer3.Interval = 86400000;
             this.timer3.Tick += new System.EventHandler(this.timer3_Tick);
             // 
-            // checkBox3
-            // 
-            this.checkBox3.AutoSize = true;
-            this.checkBox3.Location = new System.Drawing.Point(9, 48);
-            this.checkBox3.Name = "checkBox3";
-            this.checkBox3.Size = new System.Drawing.Size(108, 16);
-            this.checkBox3.TabIndex = 27;
-            this.checkBox3.Text = "节点保存数目：";
-            this.checkBox3.UseVisualStyleBackColor = true;
-            this.checkBox3.CheckedChanged += new System.EventHandler(this.checkBox3_CheckedChanged);
-            // 
-            // numericUpDown8
-            // 
-            this.numericUpDown8.Enabled = false;
-            this.numericUpDown8.Location = new System.Drawing.Point(110, 47);
-            this.numericUpDown8.Maximum = new decimal(new int[] {
-            65535,
-            0,
-            0,
-            0});
-            this.numericUpDown8.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-            this.numericUpDown8.Name = "numericUpDown8";
-            this.numericUpDown8.Size = new System.Drawing.Size(58, 21);
-            this.numericUpDown8.TabIndex = 22;
-            this.numericUpDown8.Value = new decimal(new int[] {
-            100,
-            0,
-            0,
-            0});
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.ClientSize = new System.Drawing.Size(800, 749);
+            this.ClientSize = new System.Drawing.Size(800, 789);
             this.Controls.Add(this.groupBox6);
             this.Controls.Add(this.groupBox5);
             this.Controls.Add(this.groupBox4);
@@ -1139,13 +1133,13 @@
             this.groupBox2.ResumeLayout(false);
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown8)).EndInit();
             this.groupBox4.ResumeLayout(false);
             this.groupBox4.PerformLayout();
             this.groupBox5.ResumeLayout(false);
             this.groupBox5.PerformLayout();
             this.groupBox6.ResumeLayout(false);
             this.groupBox6.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown8)).EndInit();
             this.ResumeLayout(false);
 
         }
