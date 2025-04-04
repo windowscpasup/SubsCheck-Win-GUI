@@ -53,8 +53,10 @@ Upgrade.ini                 # 升级配置文件
 config
  └─ config.yaml             # subs-check 配置文件  
 output
+ ├─ ACL4SSR_Online_Full.yaml # ACL4SSR_Online_Full.yaml 覆写配置文件
  ├─ all.yaml                # yaml格式 测试结果
  ├─ base64.txt              # base64格式 测试结果
+ ├─ bdg.yaml                # 布丁狗的订阅转换.yaml 覆写配置文件
  ├─ mihomo.yaml             # clash订阅文件 带分流规则
  ├─ node.exe                # sub-store 服务
  ├─ root.json               # sub-store 配置文件
