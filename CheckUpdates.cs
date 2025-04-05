@@ -91,7 +91,7 @@ namespace subs_check.win.gui
             }
             else
             {
-                button1.Text = "已是最新";
+                button1.Text = "已是最新版本";
                 button1.Enabled = false;
             }
 
@@ -121,7 +121,7 @@ namespace subs_check.win.gui
                         }
                         else
                         {
-                            button2.Text = "已是最新";
+                            button2.Text = "已是最新版本";
                             button2.Enabled = false;
                         }
                     }

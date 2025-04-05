@@ -515,7 +515,7 @@ namespace subs_check.win.gui
                 // 保存listen-port
                 config["listen-port"] = $@"127.0.0.1:{numericUpDown6.Value}";
                 // 保存sub-store-port
-                config["sub-store-port"] = $@"0.0.0.0:{numericUpDown7.Value}";
+                config["sub-store-port"] = $@":{numericUpDown7.Value}";
 
                 // 保存githubproxy
                 config["githubproxy"] = comboBox3.Text;
@@ -591,7 +591,7 @@ namespace subs_check.win.gui
                     {
                         fileName = "ACL4SSR_Online_Full.yaml";
                         displayName = "[内置]ACL4SSR_Online_Full";
-                        downloadUrl = "https://raw.githubusercontent.com/mihomo-party-org/override-hub/main/yaml/ACL4SSR_Online_Full.yaml";
+                        downloadUrl = "https://raw.githubusercontent.com/beck-8/override-hub/main/yaml/ACL4SSR_Online_Full.yaml";
                     }
 
                     // 确保output文件夹存在
@@ -603,6 +603,7 @@ namespace subs_check.win.gui
 
                     // 确定文件完整路径
                     downloadFilePath = Path.Combine(outputFolderPath, fileName);
+                    if (!File.Exists(downloadFilePath)) await ProcessComboBox5Selection();
 
                     // 检查文件是否存在
                     if (!File.Exists(downloadFilePath))
@@ -618,7 +619,7 @@ namespace subs_check.win.gui
                 }
                 else if (comboBox5.Text.StartsWith(githubRawPrefix)) config["mihomo-overwrite-url"] = githubProxyURL + comboBox5.Text;
                 else config["mihomo-overwrite-url"] = comboBox5.Text;
-
+                
                 config["rename-node"] = checkBox1.Checked;//以节点IP查询位置重命名节点
                 config["media-check"] = checkBox2.Checked;//是否开启流媒体检测
                 config["keep-success-proxies"] = false;
@@ -885,7 +886,7 @@ namespace subs_check.win.gui
                             else
                             {
                                 Log("无法找到适用于 Windows i386 的下载链接。", true);
-                                MessageBox.Show("未能找到适用的 subs-check.exe 下载链接。\n\n请前往 https://github.com/beck-8/subs-check/releases 自行下载！",
+                                MessageBox.Show("未能找到适用的 subs-check.exe 下载链接。\n\n可尝试更换 Github Proxy 后，点击 检查更新>更新内核。\n或前往 https://github.com/beck-8/subs-check/releases 自行下载！",
                                     "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
                             }
                         }
@@ -897,7 +898,7 @@ namespace subs_check.win.gui
                     catch (Exception ex)
                     {
                         Log($"下载过程中出错: {ex.Message}", true);
-                        MessageBox.Show($"下载 subs-check.exe 时出错: {ex.Message}\n\n请前往 https://github.com/beck-8/subs-check/releases 自行下载！",
+                        MessageBox.Show($"下载 subs-check.exe 时出错: {ex.Message}\n\n可尝试更换 Github Proxy 后，点击 检查更新>更新内核。\n或前往 https://github.com/beck-8/subs-check/releases 自行下载！",
                             "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
@@ -1897,10 +1898,10 @@ namespace subs_check.win.gui
 
         private async void comboBox5_SelectedIndexChanged(object sender, EventArgs e)
         {
-            await ProcessComboBox5Selection();
+            await ProcessComboBox5Selection(true);
         }
 
-        private async Task ProcessComboBox5Selection()
+        private async Task ProcessComboBox5Selection(bool 汇报Log = false)
         {
             if (comboBox5.Text.Contains("[内置]"))
             {
@@ -1920,7 +1921,7 @@ namespace subs_check.win.gui
                 {
                     fileName = "ACL4SSR_Online_Full.yaml";
                     displayName = "[内置]ACL4SSR_Online_Full";
-                    downloadUrl = "https://raw.githubusercontent.com/mihomo-party-org/override-hub/main/yaml/ACL4SSR_Online_Full.yaml";
+                    downloadUrl = "https://raw.githubusercontent.com/beck-8/override-hub/main/yaml/ACL4SSR_Online_Full.yaml";
                 }
 
                 // 确保output文件夹存在
@@ -1938,6 +1939,9 @@ namespace subs_check.win.gui
                 {
                     Log($"{displayName} 覆写配置文件 未找到，正在下载...");
 
+                    // 重置进度条
+                    progressBar1.Value = 0;
+
                     // 添加GitHub代理前缀如果有
                     string fullDownloadUrl = githubProxyURL + downloadUrl;
 
@@ -1950,27 +1954,66 @@ namespace subs_check.win.gui
                             client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win32; x86) AppleWebKit/537.36 (KHTML, like Gecko) cmliu/SubsCheck-Win-GUI");
                             client.Timeout = TimeSpan.FromSeconds(15); // 设置15秒超时
 
-                            // 下载文件内容
-                            HttpResponseMessage response = await client.GetAsync(fullDownloadUrl);
+                            // 先获取文件大小
+                            HttpResponseMessage headResponse = await client.SendAsync(new HttpRequestMessage(HttpMethod.Head, fullDownloadUrl));
+                            long totalBytes = headResponse.Content.Headers.ContentLength ?? 0;
 
-                            if (response.IsSuccessStatusCode)
+                            // 如果无法获取文件大小，显示不确定进度
+                            if (totalBytes == 0)
                             {
-                                // 获取响应内容并写入文件
-                                string fileContent = await response.Content.ReadAsStringAsync();
-                                File.WriteAllText(downloadFilePath, fileContent, Encoding.UTF8);
+                                //Log($"无法获取 {displayName} 文件大小，将显示不确定进度");
+                            }
 
-                                Log($"{displayName} 覆写配置文件 下载成功");
+                            // 创建下载请求并获取响应流
+                            using (var response = await client.GetAsync(fullDownloadUrl, HttpCompletionOption.ResponseHeadersRead))
+                            {
+                                if (response.IsSuccessStatusCode)
+                                {
+                                    using (var contentStream = await response.Content.ReadAsStreamAsync())
+                                    using (var fileStream = new FileStream(downloadFilePath, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true))
+                                    {
+                                        byte[] buffer = new byte[8192];
+                                        long totalBytesRead = 0;
+                                        int bytesRead;
+
+                                        while ((bytesRead = await contentStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                                        {
+                                            await fileStream.WriteAsync(buffer, 0, bytesRead);
+                                            totalBytesRead += bytesRead;
+
+                                            // 更新进度条
+                                            if (totalBytes > 0)
+                                            {
+                                                int progressPercentage = (int)((totalBytesRead * 100) / totalBytes);
+                                                // 确保进度值在有效范围内 (0-100)
+                                                progressPercentage = Math.Min(100, Math.Max(0, progressPercentage));
+                                                progressBar1.Value = progressPercentage;
+                                            }
+                                        }
+
+                                        // 确保进度条显示100%
+                                        progressBar1.Value = 100;
+                                    }
+
+                                    Log($"{displayName} 覆写配置文件 下载成功");
+                                }
+                                else
+                                {
+                                    Log($"{displayName} 覆写配置文件 下载失败: HTTP {(int)response.StatusCode} {response.ReasonPhrase}", true);
+                                }
                             }
                         }
                     }
                     catch (Exception ex)
                     {
                         Log($"{displayName} 覆写配置文件 下载失败: {ex.Message}", true);
+                        // 出错时重置进度条
+                        progressBar1.Value = 0;
                     }
                 }
                 else
                 {
-                    Log($"{displayName} 覆写配置文件 已就绪。");
+                    if (汇报Log) Log($"{displayName} 覆写配置文件 已就绪。");
                 }
             }
         }
