@@ -116,6 +116,7 @@
             this.MinimizeBox = false;
             this.Name = "EditURLs";
             this.ShowIcon = false;
+            this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "编辑 节点池订阅链接";
             this.ResumeLayout(false);

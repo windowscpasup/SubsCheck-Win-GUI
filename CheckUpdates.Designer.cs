@@ -196,6 +196,7 @@
             this.MinimizeBox = false;
             this.Name = "CheckUpdates";
             this.ShowIcon = false;
+            this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "检查更新";
             this.groupBox1.ResumeLayout(false);

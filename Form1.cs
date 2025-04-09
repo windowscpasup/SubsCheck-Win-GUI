@@ -585,7 +585,7 @@ namespace subs_check.win.gui
                     {
                         fileName = "bdg.yaml";
                         displayName = "[内置]布丁狗的订阅转换";
-                        downloadUrl = "https://raw.githubusercontent.com/mihomo-party-org/override-hub/main/yaml/%E5%B8%83%E4%B8%81%E7%8B%97%E7%9A%84%E8%AE%A2%E9%98%85%E8%BD%AC%E6%8D%A2.yaml";
+                        downloadUrl = "https://raw.githubusercontent.com/cmliu/ACL4SSR/main/yaml/bdg.yaml";
                     }
                     else // [内置]ACL4SSR
                     {
@@ -886,7 +886,7 @@ namespace subs_check.win.gui
                             else
                             {
                                 Log("无法找到适用于 Windows i386 的下载链接。", true);
-                                MessageBox.Show("未能找到适用的 subs-check.exe 下载链接。\n\n可尝试更换 Github Proxy 后，点击 检查更新>更新内核。\n或前往 https://github.com/beck-8/subs-check/releases 自行下载！",
+                                MessageBox.Show("未能找到适用的 subs-check.exe 下载链接。\n\n可尝试更换 Github Proxy 后，点击「检查更新」>「更新内核」。\n或前往 https://github.com/beck-8/subs-check/releases 自行下载！",
                                     "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
                             }
                         }
@@ -898,7 +898,7 @@ namespace subs_check.win.gui
                     catch (Exception ex)
                     {
                         Log($"下载过程中出错: {ex.Message}", true);
-                        MessageBox.Show($"下载 subs-check.exe 时出错: {ex.Message}\n\n可尝试更换 Github Proxy 后，点击 检查更新>更新内核。\n或前往 https://github.com/beck-8/subs-check/releases 自行下载！",
+                        MessageBox.Show($"下载 subs-check.exe 时出错: {ex.Message}\n\n可尝试更换 Github Proxy 后，点击「检查更新」>「更新内核」。\n或前往 https://github.com/beck-8/subs-check/releases 自行下载！",
                             "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
@@ -1915,7 +1915,7 @@ namespace subs_check.win.gui
                 {
                     fileName = "bdg.yaml";
                     displayName = "[内置]布丁狗的订阅转换";
-                    downloadUrl = "https://raw.githubusercontent.com/mihomo-party-org/override-hub/main/yaml/%E5%B8%83%E4%B8%81%E7%8B%97%E7%9A%84%E8%AE%A2%E9%98%85%E8%BD%AC%E6%8D%A2.yaml";
+                    downloadUrl = "https://raw.githubusercontent.com/cmliu/ACL4SSR/main/yaml/bdg.yaml";
                 }
                 else // [内置]ACL4SSR
                 {
@@ -2015,6 +2015,25 @@ namespace subs_check.win.gui
                 {
                     if (汇报Log) Log($"{displayName} 覆写配置文件 已就绪。");
                 }
+            }
+        }
+
+        private void numericUpDown1_ValueChanged(object sender, EventArgs e)
+        {
+            if (numericUpDown1.Value > 128)
+            {
+                string warningMessage =
+                    "⚠️ 高并发风险提醒 ⚠️\n\n" +
+                    "您设置的并发数值过高，可能导致：\n\n" +
+                    "• 运营商判定为异常流量并限制网络\n" +
+                    "• 路由器性能压力过大\n" +
+                    "• 测速结果不准确\n\n" +
+                    "并发数设置建议：\n" +
+                    "• 宽带峰值/50Mbps：一般对网络无影响\n" +
+                    "• 宽带峰值/25Mbps：可能会影响同网络下载任务\n" +
+                    "• 宽带峰值/10Mbps：可能会影响同网络下其他设备的上网体验";
+
+                MessageBox.Show(warningMessage, "网络安全警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
     }
