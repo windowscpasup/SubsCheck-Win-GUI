@@ -33,6 +33,9 @@
             this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.textBox11 = new System.Windows.Forms.TextBox();
+            this.button7 = new System.Windows.Forms.Button();
+            this.button6 = new System.Windows.Forms.Button();
             this.comboBox4 = new System.Windows.Forms.ComboBox();
             this.button3 = new System.Windows.Forms.Button();
             this.textBox1 = new System.Windows.Forms.TextBox();
@@ -59,6 +62,8 @@
             this.button5 = new System.Windows.Forms.Button();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.textBox10 = new System.Windows.Forms.TextBox();
+            this.checkBox4 = new System.Windows.Forms.CheckBox();
             this.numericUpDown8 = new System.Windows.Forms.NumericUpDown();
             this.checkBox3 = new System.Windows.Forms.CheckBox();
             this.button4 = new System.Windows.Forms.Button();
@@ -93,12 +98,7 @@
             this.textBox9 = new System.Windows.Forms.TextBox();
             this.label18 = new System.Windows.Forms.Label();
             this.timer3 = new System.Windows.Forms.Timer(this.components);
-            this.checkBox4 = new System.Windows.Forms.CheckBox();
-            this.textBox10 = new System.Windows.Forms.TextBox();
-            this.button6 = new System.Windows.Forms.Button();
             this.timer4 = new System.Windows.Forms.Timer(this.components);
-            this.button7 = new System.Windows.Forms.Button();
-            this.textBox11 = new System.Windows.Forms.TextBox();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown4)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown3)).BeginInit();
@@ -130,6 +130,7 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.textBox11);
             this.groupBox1.Controls.Add(this.button7);
             this.groupBox1.Controls.Add(this.button6);
             this.groupBox1.Controls.Add(this.comboBox4);
@@ -154,6 +155,40 @@
             this.groupBox1.TabIndex = 0;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "参数设置";
+            // 
+            // textBox11
+            // 
+            this.textBox11.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.textBox11.Location = new System.Drawing.Point(9, 365);
+            this.textBox11.Name = "textBox11";
+            this.textBox11.Size = new System.Drawing.Size(154, 21);
+            this.textBox11.TabIndex = 21;
+            this.textBox11.Text = "0 */2 * * *";
+            this.textBox11.Visible = false;
+            this.textBox11.DoubleClick += new System.EventHandler(this.切换cron表达式);
+            this.textBox11.Leave += new System.EventHandler(this.textBox11_Leave);
+            // 
+            // button7
+            // 
+            this.button7.Enabled = false;
+            this.button7.Location = new System.Drawing.Point(7, 420);
+            this.button7.Name = "button7";
+            this.button7.Size = new System.Drawing.Size(75, 23);
+            this.button7.TabIndex = 30;
+            this.button7.Text = "🔀未启动";
+            this.button7.UseVisualStyleBackColor = true;
+            this.button7.Click += new System.EventHandler(this.button7_Click);
+            // 
+            // button6
+            // 
+            this.button6.Enabled = false;
+            this.button6.Location = new System.Drawing.Point(88, 421);
+            this.button6.Name = "button6";
+            this.button6.Size = new System.Drawing.Size(75, 23);
+            this.button6.TabIndex = 29;
+            this.button6.Text = "访问WebUI";
+            this.button6.UseVisualStyleBackColor = true;
+            this.button6.Click += new System.EventHandler(this.button6_Click);
             // 
             // comboBox4
             // 
@@ -272,6 +307,7 @@
             0,
             0,
             0});
+            this.numericUpDown2.DoubleClick += new System.EventHandler(this.切换cron表达式);
             // 
             // numericUpDown1
             // 
@@ -331,6 +367,7 @@
             this.label2.Size = new System.Drawing.Size(101, 12);
             this.label2.TabIndex = 3;
             this.label2.Text = "检查间隔(分钟)：";
+            this.label2.DoubleClick += new System.EventHandler(this.切换cron表达式);
             // 
             // label1
             // 
@@ -469,7 +506,6 @@
             // 
             // groupBox2
             // 
-            this.groupBox2.Controls.Add(this.textBox11);
             this.groupBox2.Controls.Add(this.button5);
             this.groupBox2.Controls.Add(this.richTextBox1);
             this.groupBox2.Location = new System.Drawing.Point(193, 13);
@@ -527,6 +563,30 @@
             this.groupBox3.TabIndex = 2;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "高级设置";
+            // 
+            // textBox10
+            // 
+            this.textBox10.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.textBox10.Enabled = false;
+            this.textBox10.Location = new System.Drawing.Point(141, 73);
+            this.textBox10.Name = "textBox10";
+            this.textBox10.PasswordChar = '*';
+            this.textBox10.Size = new System.Drawing.Size(110, 21);
+            this.textBox10.TabIndex = 6;
+            this.textBox10.Text = "admin";
+            this.textBox10.Enter += new System.EventHandler(this.textBox10_Enter);
+            this.textBox10.Leave += new System.EventHandler(this.textBox10_Leave);
+            // 
+            // checkBox4
+            // 
+            this.checkBox4.AutoSize = true;
+            this.checkBox4.Location = new System.Drawing.Point(9, 75);
+            this.checkBox4.Name = "checkBox4";
+            this.checkBox4.Size = new System.Drawing.Size(138, 16);
+            this.checkBox4.TabIndex = 28;
+            this.checkBox4.Text = "启用WebUI API密钥：";
+            this.checkBox4.UseVisualStyleBackColor = true;
+            this.checkBox4.CheckedChanged += new System.EventHandler(this.checkBox4_CheckedChanged);
             // 
             // numericUpDown8
             // 
@@ -1341,65 +1401,10 @@
             this.timer3.Interval = 86400000;
             this.timer3.Tick += new System.EventHandler(this.timer3_Tick);
             // 
-            // checkBox4
-            // 
-            this.checkBox4.AutoSize = true;
-            this.checkBox4.Location = new System.Drawing.Point(9, 75);
-            this.checkBox4.Name = "checkBox4";
-            this.checkBox4.Size = new System.Drawing.Size(138, 16);
-            this.checkBox4.TabIndex = 28;
-            this.checkBox4.Text = "启用WebUI API密钥：";
-            this.checkBox4.UseVisualStyleBackColor = true;
-            this.checkBox4.CheckedChanged += new System.EventHandler(this.checkBox4_CheckedChanged);
-            // 
-            // textBox10
-            // 
-            this.textBox10.Enabled = false;
-            this.textBox10.Location = new System.Drawing.Point(141, 73);
-            this.textBox10.Name = "textBox10";
-            this.textBox10.PasswordChar = '*';
-            this.textBox10.Size = new System.Drawing.Size(110, 21);
-            this.textBox10.TabIndex = 6;
-            this.textBox10.Text = "admin";
-            this.textBox10.Enter += new System.EventHandler(this.textBox10_Enter);
-            this.textBox10.Leave += new System.EventHandler(this.textBox10_Leave);
-            // 
-            // button6
-            // 
-            this.button6.Enabled = false;
-            this.button6.Location = new System.Drawing.Point(88, 421);
-            this.button6.Name = "button6";
-            this.button6.Size = new System.Drawing.Size(75, 23);
-            this.button6.TabIndex = 29;
-            this.button6.Text = "访问WebUI";
-            this.button6.UseVisualStyleBackColor = true;
-            this.button6.Click += new System.EventHandler(this.button6_Click);
-            // 
             // timer4
             // 
             this.timer4.Interval = 1000;
             this.timer4.Tick += new System.EventHandler(this.timer4_Tick);
-            // 
-            // button7
-            // 
-            this.button7.Enabled = false;
-            this.button7.Location = new System.Drawing.Point(7, 420);
-            this.button7.Name = "button7";
-            this.button7.Size = new System.Drawing.Size(75, 23);
-            this.button7.TabIndex = 30;
-            this.button7.Text = "🔀未启动";
-            this.button7.UseVisualStyleBackColor = true;
-            this.button7.Click += new System.EventHandler(this.button7_Click);
-            // 
-            // textBox11
-            // 
-            this.textBox11.Location = new System.Drawing.Point(106, 283);
-            this.textBox11.Name = "textBox11";
-            this.textBox11.Size = new System.Drawing.Size(154, 21);
-            this.textBox11.TabIndex = 21;
-            this.textBox11.Text = "*/30 * * * *";
-            this.textBox11.Visible = false;
-            this.textBox11.Leave += new System.EventHandler(this.textBox11_Leave);
             // 
             // Form1
             // 
@@ -1429,7 +1434,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown5)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown7)).EndInit();
             this.groupBox2.ResumeLayout(false);
-            this.groupBox2.PerformLayout();
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown8)).EndInit();

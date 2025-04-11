@@ -12,9 +12,6 @@ using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using YamlDotNet.Core;
-using YamlDotNet.Core.Tokens;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.ProgressBar;
 
 namespace subs_check.win.gui
 {
@@ -33,13 +30,16 @@ namespace subs_check.win.gui
         string 当前GUI版本号 = "未知版本";
         string 最新GUI版本号 = "未知版本";
         private string nextCheckTime = null;// 用于存储下次检查时间
+        string WebUIapiKey = "CMLiussss";
         public Form1()
         {
             InitializeComponent();
             originalNotifyIcon = notifyIcon1.Icon;
 
             toolTip1.SetToolTip(numericUpDown1, "并发线程数：推荐 宽带峰值/50M。");
-            toolTip1.SetToolTip(numericUpDown2, "检查间隔时间(分钟)：放置后台的时候，下次自动测速的间隔时间。");
+            toolTip1.SetToolTip(numericUpDown2, "检查间隔时间(分钟)：放置后台的时候，下次自动测速的间隔时间。\n\n 双击切换 使用「cron表达式」");
+            toolTip1.SetToolTip(label2, "检查间隔时间(分钟)：放置后台的时候，下次自动测速的间隔时间。\n\n 双击切换 使用「cron表达式」");
+
             toolTip1.SetToolTip(numericUpDown3, "超时时间(毫秒)：节点的最大延迟。");
             toolTip1.SetToolTip(numericUpDown4, "最低测速结果舍弃(KB/s)。");
             toolTip1.SetToolTip(numericUpDown5, "下载测试时间(s)：与下载链接大小相关，默认最大测试10s。");
@@ -61,6 +61,8 @@ namespace subs_check.win.gui
 
             toolTip1.SetToolTip(checkBox3, "保存几个成功的节点，不选代表不限制，内核版本需要 v2.1.0 以上\n如果你的并发数量超过这个参数，那么成功的结果可能会大于这个数值");
             toolTip1.SetToolTip(numericUpDown8, "保存几个成功的节点，不选代表不限制，内核版本需要 v2.1.0 以上\n如果你的并发数量超过这个参数，那么成功的结果可能会大于这个数值");
+
+            toolTip1.SetToolTip(textBox11, "支持标准cron表达式，如：\n 0 */2 * * * 表示每2小时的整点执行\n 0 0 */2 * * 表示每2天的0点执行\n 0 0 1 * * 表示每月1日0点执行\n */30 * * * * 表示每30分钟执行一次\n\n 双击切换 使用「分钟倒计时」");
             // 设置通知图标的上下文菜单
             SetupNotifyIconContextMenu();
         }
@@ -328,30 +330,38 @@ namespace subs_check.win.gui
                         }
                     }
 
-                    string githubproxy = 读取config字符串(config, "github-proxy");
-                    if (githubproxy != null && githubproxy != "")
+                    string githubproxy = 读取config字符串(config, "githubproxy");
+                    if (githubproxy != null)
                     {
-                        string domain = githubproxy;
-
-                        // 移除协议部分 (如果存在)
-                        int protocolIndex = domain.IndexOf("://");
-                        if (protocolIndex >= 0)
-                        {
-                            domain = domain.Substring(protocolIndex + 3);
-                        }
-
-                        // 移除路径部分 (如果存在)
-                        int pathIndex = domain.IndexOf('/');
-                        if (pathIndex > 0)
-                        {
-                            domain = domain.Substring(0, pathIndex);
-                        }
-
-                        comboBox3.Text = domain;
+                        comboBox3.Text = githubproxy;
                     }
-                    else
+                    else 
                     {
-                        comboBox3.Text = "自动选择";
+                        string githubproxyurl = 读取config字符串(config, "github-proxy");
+                        if (githubproxyurl != null && githubproxyurl != "")
+                        {
+                            string domain = githubproxyurl;
+
+                            // 移除协议部分 (如果存在)
+                            int protocolIndex = domain.IndexOf("://");
+                            if (protocolIndex >= 0)
+                            {
+                                domain = domain.Substring(protocolIndex + 3);
+                            }
+
+                            // 移除路径部分 (如果存在)
+                            int pathIndex = domain.IndexOf('/');
+                            if (pathIndex > 0)
+                            {
+                                domain = domain.Substring(0, pathIndex);
+                            }
+
+                            comboBox3.Text = domain;
+                        }
+                        else
+                        {
+                            comboBox3.Text = "自动选择";
+                        }
                     }
 
                     const string githubRawPrefix = "https://raw.githubusercontent.com/";
@@ -463,14 +473,38 @@ namespace subs_check.win.gui
                     string apikey = 读取config字符串(config, "api-key");
                     if (apikey != null) 
                     {
-                        if (apikey != "subs-check-api-key") textBox10.Text = apikey;
+                        if (apikey == GetComputerNameMD5()) 
+                        {
+                            checkBox4.Checked = false;
+                            string oldapikey = 读取config字符串(config, "old-api-key");
+                            if (oldapikey != null)
+                            {
+                                textBox10.Text = oldapikey;
+                            }
+                            else
+                            {
+                                textBox10.PasswordChar = '\0';
+                                textBox10.Text = "请输入密钥";
+                                textBox10.ForeColor = Color.Gray;
+                            }
+                        } 
                         else
                         {
-                            textBox10.PasswordChar = '\0';
-                            textBox10.Text = "请输入密钥";
-                            textBox10.ForeColor = Color.Gray;
+                            textBox10.Text = apikey;
                         }
                     }
+
+                    string cronexpression = 读取config字符串(config, "cron-expression");
+                    if (cronexpression != null)
+                    {
+                        textBox11.Text = cronexpression;
+                        string cronDescription = GetCronExpressionDescription(textBox11.Text);
+                        textBox11.Location = new Point(9, 48);
+                        textBox11.Visible = true;
+                        label2.Visible = false;
+                        numericUpDown2.Visible = false;
+                    } 
+
                 }
             }
             catch (Exception ex)
@@ -529,6 +563,7 @@ namespace subs_check.win.gui
                 // 从UI控件获取值并添加到字典中
                 config["concurrent"] = (int)numericUpDown1.Value;
                 config["check-interval"] = (int)numericUpDown2.Value;
+                if (textBox11.Visible) config["cron-expression"] = textBox11.Text;
                 config["timeout"] = (int)numericUpDown3.Value;
                 config["min-speed"] = (int)numericUpDown4.Value;
                 config["download-timeout"] = (int)numericUpDown5.Value;
@@ -555,11 +590,20 @@ namespace subs_check.win.gui
 
                 // 保存enable-web-ui
                 config["enable-web-ui"] = true;
-                if (textBox10.Text == "请输入密钥") config["api-key"] = "subs-check-api-key";
-                else config["api-key"] = textBox10.Text;
+
                 // 保存listen-port
-                if (checkBox4.Checked) config["listen-port"] = $@":{numericUpDown6.Value}";
-                else config["listen-port"] = $@"127.0.0.1:{numericUpDown6.Value}";
+                if (checkBox4.Checked) 
+                {
+                    WebUIapiKey = textBox10.Text;
+                    config["listen-port"] = $@":{numericUpDown6.Value}";
+                }
+                else
+                {
+                    WebUIapiKey = GetComputerNameMD5();
+                    config["listen-port"] = $@"127.0.0.1:{numericUpDown6.Value}";
+                    if (textBox10.Text != "请输入密钥") config["old-api-key"] = textBox10.Text;
+                }
+                config["api-key"] = WebUIapiKey;
 
                 // 保存sub-store-port
                 config["sub-store-port"] = $@":{numericUpDown7.Value}";
@@ -590,12 +634,18 @@ namespace subs_check.win.gui
                         githubProxyURL = await DetectGitHubProxyAsync(proxyItems);
                     }
                 }
-                else if(comboBox3.Text == "自动选择") githubProxyURL = "";
 
-                if (comboBox3.Text != "自动选择") githubProxyURL = $"https://{comboBox3.Text}/";
-                // 保存github proxy
-                config["github-proxy"] = githubProxyURL;
-
+                if (comboBox3.Text == "自动选择") 
+                {
+                    config["githubproxy"] = "自动选择";
+                    config["github-proxy"] = githubProxyURL;
+                }
+                else
+                {
+                    config["githubproxy"] = comboBox3.Text;
+                    config["github-proxy"] = githubProxyURL;
+                }
+                
                 // 保存sub-urls列表
                 List<string> subUrls = new List<string>();
                 string allyamlFilePath = System.IO.Path.Combine(executablePath, "output", "all.yaml");
@@ -739,6 +789,7 @@ namespace subs_check.win.gui
 
                 numericUpDown1.Enabled = false;
                 numericUpDown2.Enabled = false;
+                textBox11.Enabled = false;
                 numericUpDown3.Enabled = false;
                 numericUpDown4.Enabled = false;
                 numericUpDown5.Enabled = false;
@@ -788,6 +839,7 @@ namespace subs_check.win.gui
                 button3.Enabled = false;
                 numericUpDown1.Enabled = true;
                 numericUpDown2.Enabled = true;
+                textBox11.Enabled = true;
                 numericUpDown3.Enabled = true;
                 numericUpDown4.Enabled = true;
                 numericUpDown5.Enabled = true;
@@ -1095,8 +1147,6 @@ namespace subs_check.win.gui
                 }
             }
         }
-
-        private string lastProgressLine = null; // 这个变量已经在类中定义，用于记录最后的进度行
         
         private void SubsCheckProcess_OutputDataReceived(object sender, DataReceivedEventArgs e)
         {
@@ -1559,9 +1609,15 @@ namespace subs_check.win.gui
             string logType = isError ? "ERR" : "INF";
             richTextBox1.AppendText($"{timestamp} {logType} {message}\r\n");
 
-            // 滚动到最底部
-            richTextBox1.SelectionStart = richTextBox1.Text.Length;
-            richTextBox1.ScrollToCaret();
+            if (richTextBox1.IsHandleCreated)
+            {
+                richTextBox1.BeginInvoke((MethodInvoker)(() =>
+                {
+                    // 滚动到最底部
+                    richTextBox1.SelectionStart = richTextBox1.Text.Length;
+                    richTextBox1.ScrollToCaret();
+                }));
+            }
         }
 
         private void 恢复窗口()
@@ -2175,7 +2231,6 @@ namespace subs_check.win.gui
         {
             string[] resultArray = new string[6];
             string baseUrl = $"http://127.0.0.1:{numericUpDown6.Value}";
-            string apiKey = textBox10.Text == "请输入密钥" ? "subs-check-api-key" : textBox10.Text;
 
             try
             {
@@ -2185,7 +2240,7 @@ namespace subs_check.win.gui
                     client.BaseAddress = new Uri(baseUrl);
 
                     // 添加API密钥请求头
-                    client.DefaultRequestHeaders.Add("X-API-Key", apiKey);
+                    client.DefaultRequestHeaders.Add("X-API-Key", WebUIapiKey);
 
                     // 设置超时时间
                     client.Timeout = TimeSpan.FromSeconds(5);
@@ -2258,7 +2313,7 @@ namespace subs_check.win.gui
 
         private async void timer4_Tick(object sender, EventArgs e)
         {
-            if (!button7.Enabled) button7.Enabled = true;
+            //if (!button7.Enabled) button7.Enabled = true;
             string[] subscheck状态 = await GetApiStatusAsync();
             string 状态类型 = subscheck状态[0];
             string 状态图标类别 = subscheck状态[1];
@@ -2276,6 +2331,7 @@ namespace subs_check.win.gui
                 if (nodeTotal > 0) {
                     int 进度条百分比 = int.Parse(进度百分比) * 100 / nodeTotal;
                     progressBar1.Value = 进度条百分比;
+                    if (!button7.Enabled) button7.Enabled = true;
                 }
                 
                 // 确保通知图标文本不超过63个字符
@@ -2350,12 +2406,11 @@ namespace subs_check.win.gui
             {
                 // 获取API基础地址和API密钥
                 string baseUrl = $"http://127.0.0.1:{numericUpDown6.Value}";
-                string apiKey = textBox10.Text == "请输入密钥" ? "subs-check-api-key" : textBox10.Text;
 
                 using (HttpClient client = new HttpClient())
                 {
                     client.BaseAddress = new Uri(baseUrl);
-                    client.DefaultRequestHeaders.Add("X-API-Key", apiKey);
+                    client.DefaultRequestHeaders.Add("X-API-Key", WebUIapiKey);
                     client.Timeout = TimeSpan.FromSeconds(10);
 
                     // 发送POST请求
@@ -2390,14 +2445,14 @@ namespace subs_check.win.gui
                 string cronDescription = GetCronExpressionDescription(textBox11.Text);
                 // 可以用工具提示或者消息框显示，这里使用消息框
                 //MessageBox.Show(cronDescription, "Cron表达式说明", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                toolTip1.SetToolTip(textBox11, $"Cron表达式说明 {cronDescription}");
+                Log($"Cron表达式说明 {cronDescription}");
             }
             else
             {
                 MessageBox.Show("请输入有效的cron表达式，例如：*/30 * * * *", "无效的cron表达式",
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 textBox11.Focus();
-                textBox11.Text = "*/30 * * * *"; // 恢复默认值
+                textBox11.Text = "0 */2 * * *"; // 恢复默认值
             }
         }
 
@@ -2608,6 +2663,62 @@ namespace subs_check.win.gui
                 return weekdays[value];
             }
             return $"{value}{unit}";
+        }
+
+        private void 切换cron表达式(object sender, EventArgs e)
+        {
+            if (textBox11.Visible)
+            {
+                textBox11.Visible = false;
+                label2.Visible = true;
+                numericUpDown2.Visible = true;
+                Log("下次检查时间间隔 使用分钟倒计时");
+            }
+            else
+            {
+                textBox11.Location = new Point(9, 48);
+                textBox11.Visible = true;
+                label2.Visible = false;
+                numericUpDown2.Visible = false;
+                Log("下次检查时间间隔 使用cron表达式");
+            }
+        }
+
+        /// <summary>
+        /// 获取计算机名的MD5哈希值
+        /// </summary>
+        /// <returns>返回计算机名的MD5哈希字符串(32位小写)</returns>
+        private string GetComputerNameMD5()
+        {
+            try
+            {
+                // 获取计算机名
+                string computerName = System.Environment.MachineName;
+
+                // 引入必要的命名空间
+                using (System.Security.Cryptography.MD5 md5 = System.Security.Cryptography.MD5.Create())
+                {
+                    // 将计算机名转换为字节数组
+                    byte[] inputBytes = System.Text.Encoding.UTF8.GetBytes(computerName);
+
+                    // 计算MD5哈希值
+                    byte[] hashBytes = md5.ComputeHash(inputBytes);
+
+                    // 将字节数组转换为十六进制字符串
+                    StringBuilder sb = new StringBuilder();
+                    for (int i = 0; i < hashBytes.Length; i++)
+                    {
+                        sb.Append(hashBytes[i].ToString("x2"));
+                    }
+
+                    return sb.ToString();
+                }
+            }
+            catch (Exception ex)
+            {
+                Log($"计算计算机名MD5时出错: {ex.Message}", true);
+                return "CMLiussss";
+            }
         }
     }
 }
