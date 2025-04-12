@@ -2871,5 +2871,37 @@ namespace subs_check.win.gui
                 throw; // 重新抛出异常，让调用者处理
             }
         }
+
+        private static about aboutWindow = null;
+        private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            // 检查窗口是否已经打开
+            if (aboutWindow != null && !aboutWindow.IsDisposed)
+            {
+                // 窗口已经存在，激活它
+                aboutWindow.Activate();
+                return;
+            }
+
+            // 需要创建新窗口
+            this.BeginInvoke(new Action(() =>
+            {
+                // 创建about窗口实例
+                aboutWindow = new about();
+
+                // 传递版本号信息
+                aboutWindow.GuiVersion = 当前GUI版本号;
+                aboutWindow.CoreVersion = 当前subsCheck版本号;
+
+                // 添加窗口关闭时的处理，清除静态引用
+                aboutWindow.FormClosed += (s, args) => aboutWindow = null;
+
+                // 非模态显示窗口
+                aboutWindow.Show(this);
+
+                // 设置TopMost确保窗口显示在最前面
+                aboutWindow.TopMost = true;
+            }));
+        }
     }
 }
