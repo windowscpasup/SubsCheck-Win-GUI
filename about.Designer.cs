@@ -40,20 +40,20 @@
             this.linkLabel2 = new System.Windows.Forms.LinkLabel();
             this.label8 = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.label9 = new System.Windows.Forms.Label();
-            this.label10 = new System.Windows.Forms.Label();
-            this.label11 = new System.Windows.Forms.Label();
-            this.linkLabel3 = new System.Windows.Forms.LinkLabel();
-            this.label12 = new System.Windows.Forms.Label();
-            this.linkLabel4 = new System.Windows.Forms.LinkLabel();
             this.label13 = new System.Windows.Forms.Label();
+            this.linkLabel4 = new System.Windows.Forms.LinkLabel();
+            this.label12 = new System.Windows.Forms.Label();
+            this.linkLabel3 = new System.Windows.Forms.LinkLabel();
+            this.label11 = new System.Windows.Forms.Label();
+            this.label10 = new System.Windows.Forms.Label();
+            this.label9 = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.label14 = new System.Windows.Forms.Label();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
-            this.linkLabel5 = new System.Windows.Forms.LinkLabel();
-            this.linkLabel6 = new System.Windows.Forms.LinkLabel();
-            this.linkLabel8 = new System.Windows.Forms.LinkLabel();
             this.label15 = new System.Windows.Forms.Label();
+            this.linkLabel8 = new System.Windows.Forms.LinkLabel();
+            this.linkLabel6 = new System.Windows.Forms.LinkLabel();
+            this.linkLabel5 = new System.Windows.Forms.LinkLabel();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.groupBox1.SuspendLayout();
@@ -64,7 +64,7 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(495, 263);
+            this.button1.Location = new System.Drawing.Point(513, 619);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(75, 23);
             this.button1.TabIndex = 0;
@@ -182,52 +182,14 @@
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "基本信息：";
             // 
-            // label9
+            // label13
             // 
-            this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(18, 19);
-            this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(65, 12);
-            this.label9.TabIndex = 11;
-            this.label9.Text = "当前版本：";
-            // 
-            // label10
-            // 
-            this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(18, 59);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(53, 12);
-            this.label10.TabIndex = 12;
-            this.label10.Text = "开发者：";
-            // 
-            // label11
-            // 
-            this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(18, 99);
-            this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(65, 12);
-            this.label11.TabIndex = 13;
-            this.label11.Text = "联系方式：";
-            // 
-            // linkLabel3
-            // 
-            this.linkLabel3.AutoSize = true;
-            this.linkLabel3.Location = new System.Drawing.Point(113, 99);
-            this.linkLabel3.Name = "linkLabel3";
-            this.linkLabel3.Size = new System.Drawing.Size(89, 12);
-            this.linkLabel3.TabIndex = 14;
-            this.linkLabel3.TabStop = true;
-            this.linkLabel3.Text = "Telegram交流群";
-            this.linkLabel3.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel3_LinkClicked);
-            // 
-            // label12
-            // 
-            this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(18, 79);
-            this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(65, 12);
-            this.label12.TabIndex = 15;
-            this.label12.Text = "视频教程：";
+            this.label13.AutoSize = true;
+            this.label13.Location = new System.Drawing.Point(113, 59);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(17, 12);
+            this.label13.TabIndex = 17;
+            this.label13.Text = "CM";
             // 
             // linkLabel4
             // 
@@ -240,14 +202,52 @@
             this.linkLabel4.Text = "Youtube";
             this.linkLabel4.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel4_LinkClicked);
             // 
-            // label13
+            // label12
             // 
-            this.label13.AutoSize = true;
-            this.label13.Location = new System.Drawing.Point(113, 59);
-            this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(17, 12);
-            this.label13.TabIndex = 17;
-            this.label13.Text = "CM";
+            this.label12.AutoSize = true;
+            this.label12.Location = new System.Drawing.Point(18, 79);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(65, 12);
+            this.label12.TabIndex = 15;
+            this.label12.Text = "视频教程：";
+            // 
+            // linkLabel3
+            // 
+            this.linkLabel3.AutoSize = true;
+            this.linkLabel3.Location = new System.Drawing.Point(113, 99);
+            this.linkLabel3.Name = "linkLabel3";
+            this.linkLabel3.Size = new System.Drawing.Size(89, 12);
+            this.linkLabel3.TabIndex = 14;
+            this.linkLabel3.TabStop = true;
+            this.linkLabel3.Text = "Telegram交流群";
+            this.linkLabel3.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel3_LinkClicked);
+            // 
+            // label11
+            // 
+            this.label11.AutoSize = true;
+            this.label11.Location = new System.Drawing.Point(18, 99);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(65, 12);
+            this.label11.TabIndex = 13;
+            this.label11.Text = "联系方式：";
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(18, 59);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(53, 12);
+            this.label10.TabIndex = 12;
+            this.label10.Text = "开发者：";
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(18, 19);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(65, 12);
+            this.label9.TabIndex = 11;
+            this.label9.Text = "当前版本：";
             // 
             // groupBox2
             // 
@@ -281,27 +281,14 @@
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "诚挚感谢下列开源项目及其维护者为软件开发提供的支持（排名不分先后，未能及时列出也会心存感激）";
             // 
-            // linkLabel5
+            // label15
             // 
-            this.linkLabel5.AutoSize = true;
-            this.linkLabel5.Location = new System.Drawing.Point(18, 19);
-            this.linkLabel5.Name = "linkLabel5";
-            this.linkLabel5.Size = new System.Drawing.Size(41, 12);
-            this.linkLabel5.TabIndex = 18;
-            this.linkLabel5.TabStop = true;
-            this.linkLabel5.Text = "beck-8";
-            this.linkLabel5.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel5_LinkClicked);
-            // 
-            // linkLabel6
-            // 
-            this.linkLabel6.AutoSize = true;
-            this.linkLabel6.Location = new System.Drawing.Point(65, 19);
-            this.linkLabel6.Name = "linkLabel6";
-            this.linkLabel6.Size = new System.Drawing.Size(65, 12);
-            this.linkLabel6.TabIndex = 19;
-            this.linkLabel6.TabStop = true;
-            this.linkLabel6.Text = "bestruirui";
-            this.linkLabel6.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel6_LinkClicked);
+            this.label15.AutoSize = true;
+            this.label15.Location = new System.Drawing.Point(201, 19);
+            this.label15.Name = "label15";
+            this.label15.Size = new System.Drawing.Size(65, 12);
+            this.label15.TabIndex = 19;
+            this.label15.Text = "ChatGPT 等";
             // 
             // linkLabel8
             // 
@@ -314,34 +301,46 @@
             this.linkLabel8.Text = "Sub-Store";
             this.linkLabel8.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel8_LinkClicked);
             // 
-            // label15
+            // linkLabel6
             // 
-            this.label15.AutoSize = true;
-            this.label15.Location = new System.Drawing.Point(201, 19);
-            this.label15.Name = "label15";
-            this.label15.Size = new System.Drawing.Size(65, 12);
-            this.label15.TabIndex = 19;
-            this.label15.Text = "ChatGPT 等";
+            this.linkLabel6.AutoSize = true;
+            this.linkLabel6.Location = new System.Drawing.Point(65, 19);
+            this.linkLabel6.Name = "linkLabel6";
+            this.linkLabel6.Size = new System.Drawing.Size(65, 12);
+            this.linkLabel6.TabIndex = 19;
+            this.linkLabel6.TabStop = true;
+            this.linkLabel6.Text = "bestruirui";
+            this.linkLabel6.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel6_LinkClicked);
+            // 
+            // linkLabel5
+            // 
+            this.linkLabel5.AutoSize = true;
+            this.linkLabel5.Location = new System.Drawing.Point(18, 19);
+            this.linkLabel5.Name = "linkLabel5";
+            this.linkLabel5.Size = new System.Drawing.Size(41, 12);
+            this.linkLabel5.TabIndex = 18;
+            this.linkLabel5.TabStop = true;
+            this.linkLabel5.Text = "beck-8";
+            this.linkLabel5.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel5_LinkClicked);
             // 
             // groupBox4
             // 
             this.groupBox4.Controls.Add(this.textBox1);
-            this.groupBox4.Controls.Add(this.button1);
             this.groupBox4.Location = new System.Drawing.Point(12, 343);
             this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(576, 293);
+            this.groupBox4.Size = new System.Drawing.Size(576, 270);
             this.groupBox4.TabIndex = 14;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "使用条款 与 免责声明";
             // 
             // textBox1
             // 
-            this.textBox1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.textBox1.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textBox1.Location = new System.Drawing.Point(6, 20);
             this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
             this.textBox1.ReadOnly = true;
-            this.textBox1.Size = new System.Drawing.Size(564, 237);
+            this.textBox1.Size = new System.Drawing.Size(564, 244);
             this.textBox1.TabIndex = 0;
             this.textBox1.Text = resources.GetString("textBox1.Text");
             // 
@@ -351,8 +350,9 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.ClientSize = new System.Drawing.Size(598, 646);
+            this.ClientSize = new System.Drawing.Size(598, 651);
             this.Controls.Add(this.groupBox4);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);

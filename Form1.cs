@@ -744,6 +744,23 @@ namespace subs_check.win.gui
                 if (!Directory.Exists(configDirPath))
                     Directory.CreateDirectory(configDirPath);
 
+                string moreYamlPath = Path.Combine(configDirPath, "more.yaml");
+                if (File.Exists(moreYamlPath))
+                {
+                    // 读取more.yaml的内容
+                    string moreYamlContent = File.ReadAllText(moreYamlPath);
+
+                    // 确保more.yaml内容以换行开始
+                    if (!moreYamlContent.StartsWith("\n") && !moreYamlContent.StartsWith("\r\n"))
+                    {
+                        yamlContent += "\n"; // 添加换行符作为分隔
+                    }
+
+                    // 将more.yaml的内容追加到要写入的config.yaml内容后
+                    yamlContent += moreYamlContent;
+
+                    Log($"已将补充参数配置 more.yaml 内容追加到配置文件");
+                }
                 // 写入YAML文件
                 File.WriteAllText(configFilePath, yamlContent);
             }
@@ -2902,6 +2919,31 @@ namespace subs_check.win.gui
                 // 设置TopMost确保窗口显示在最前面
                 aboutWindow.TopMost = true;
             }));
+        }
+
+        private void button8_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                // 创建MoreYAML窗口实例
+                MoreYAML moreYamlWindow = new MoreYAML();
+
+                // 显示为模态对话框，这会阻塞主线程直到窗口关闭
+                DialogResult result = moreYamlWindow.ShowDialog(this);
+
+                // 如果需要，可以处理对话框的返回结果
+                if (result == DialogResult.OK)
+                {
+                    // 用户点击了"确定"或某种完成操作的按钮
+                    Log("补充参数配置已成功保存到 more.yaml 文件！设置已应用");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log($"打开MoreYAML窗口时出错: {ex.Message}", true);
+                MessageBox.Show($"打开MoreYAML窗口时出错: {ex.Message}", "错误",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
     }
 }

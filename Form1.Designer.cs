@@ -59,9 +59,11 @@
             this.numericUpDown7 = new System.Windows.Forms.NumericUpDown();
             this.label20 = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.linkLabel1 = new System.Windows.Forms.LinkLabel();
             this.button5 = new System.Windows.Forms.Button();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.button8 = new System.Windows.Forms.Button();
             this.textBox10 = new System.Windows.Forms.TextBox();
             this.checkBox4 = new System.Windows.Forms.CheckBox();
             this.numericUpDown8 = new System.Windows.Forms.NumericUpDown();
@@ -99,8 +101,6 @@
             this.label18 = new System.Windows.Forms.Label();
             this.timer3 = new System.Windows.Forms.Timer(this.components);
             this.timer4 = new System.Windows.Forms.Timer(this.components);
-            this.linkLabel1 = new System.Windows.Forms.LinkLabel();
-            this.button8 = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown4)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown3)).BeginInit();
@@ -128,6 +128,7 @@
             // timer1
             // 
             this.timer1.Enabled = true;
+            this.timer1.Interval = 1;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
             // groupBox1
@@ -518,6 +519,17 @@
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "实时日志";
             // 
+            // linkLabel1
+            // 
+            this.linkLabel1.AutoSize = true;
+            this.linkLabel1.Location = new System.Drawing.Point(460, 2);
+            this.linkLabel1.Name = "linkLabel1";
+            this.linkLabel1.Size = new System.Drawing.Size(137, 12);
+            this.linkLabel1.TabIndex = 21;
+            this.linkLabel1.TabStop = true;
+            this.linkLabel1.Text = "关于 SubsCheck Win GUI";
+            this.linkLabel1.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel1_LinkClicked);
+            // 
             // button5
             // 
             this.button5.Location = new System.Drawing.Point(515, 450);
@@ -567,6 +579,17 @@
             this.groupBox3.TabIndex = 2;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "高级设置";
+            this.groupBox3.Visible = false;
+            // 
+            // button8
+            // 
+            this.button8.Location = new System.Drawing.Point(695, 43);
+            this.button8.Name = "button8";
+            this.button8.Size = new System.Drawing.Size(75, 23);
+            this.button8.TabIndex = 29;
+            this.button8.Text = "补充参数";
+            this.button8.UseVisualStyleBackColor = true;
+            this.button8.Click += new System.EventHandler(this.button8_Click);
             // 
             // textBox10
             // 
@@ -1410,34 +1433,13 @@
             this.timer4.Interval = 1000;
             this.timer4.Tick += new System.EventHandler(this.timer4_Tick);
             // 
-            // linkLabel1
-            // 
-            this.linkLabel1.AutoSize = true;
-            this.linkLabel1.Location = new System.Drawing.Point(460, 2);
-            this.linkLabel1.Name = "linkLabel1";
-            this.linkLabel1.Size = new System.Drawing.Size(137, 12);
-            this.linkLabel1.TabIndex = 21;
-            this.linkLabel1.TabStop = true;
-            this.linkLabel1.Text = "关于 SubsCheck Win GUI";
-            this.linkLabel1.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel1_LinkClicked);
-            // 
-            // button8
-            // 
-            this.button8.Enabled = false;
-            this.button8.Location = new System.Drawing.Point(695, 43);
-            this.button8.Name = "button8";
-            this.button8.Size = new System.Drawing.Size(75, 23);
-            this.button8.TabIndex = 29;
-            this.button8.Text = "补充参数";
-            this.button8.UseVisualStyleBackColor = true;
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.ClientSize = new System.Drawing.Size(800, 785);
+            this.ClientSize = new System.Drawing.Size(800, 784);
             this.Controls.Add(this.groupBox6);
             this.Controls.Add(this.groupBox5);
             this.Controls.Add(this.groupBox4);
