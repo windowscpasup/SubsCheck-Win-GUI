@@ -73,7 +73,7 @@ namespace subs_check.win.gui
             ContextMenuStrip contextMenu = new ContextMenuStrip();
 
             // 创建"▶️ 启动"菜单项
-            startMenuItem = new ToolStripMenuItem("▶️ 启动");
+            startMenuItem = new ToolStripMenuItem("启动");
             startMenuItem.Click += (sender, e) =>
             {
                 if (button1.Text == "▶️ 启动")
@@ -83,7 +83,7 @@ namespace subs_check.win.gui
             };
 
             // 创建"⏹️ 停止"菜单项
-            stopMenuItem = new ToolStripMenuItem("⏹️ 停止");
+            stopMenuItem = new ToolStripMenuItem("停止");
             stopMenuItem.Click += (sender, e) =>
             {
                 if (button1.Text == "⏹️ 停止")
@@ -919,47 +919,152 @@ namespace subs_check.win.gui
 
                             if (downloadUrl != null)
                             {
+                                string 代理下载链接 = githubProxyURL + downloadUrl;
+                                string 原生下载链接 = 代理下载链接;
+                                // 计算"https://"在下载链接中出现的次数
+                                int httpsCount = 0;
+                                int lastIndex = -1;
+                                int currentIndex = 0;
+
+                                // 查找所有"https://"出现的位置
+                                while ((currentIndex = 代理下载链接.IndexOf("https://", currentIndex)) != -1)
+                                {
+                                    httpsCount++;
+                                    lastIndex = currentIndex;
+                                    currentIndex += 8; // "https://".Length = 8
+                                }
+
+                                // 如果"https://"出现2次或以上，提取最后一个"https://"之后的内容
+                                if (httpsCount >= 2 && lastIndex != -1)
+                                {
+                                    原生下载链接 = 代理下载链接.Substring(lastIndex);
+                                }
+
                                 string executablePath = Path.GetDirectoryName(Application.ExecutablePath);
+
+                                // 创建下载请求 - 优化的多级尝试下载逻辑
+                                Log("开始下载文件...");
+                                bool downloadSuccess = false;
                                 string zipFilePath = Path.Combine(executablePath, "subs-check_Windows_i386.zip");
+                                string failureReason = "";
+
                                 // 如果文件已存在，先删除
                                 if (File.Exists(zipFilePath)) File.Delete(zipFilePath);
 
-                                Log($"开始下载 {downloadUrl}");
-
-                                // 重置进度条
-                                progressBar1.Value = 0;
-
-                                // 获取文件大小
-                                HttpResponseMessage sizeResponse = await client.SendAsync(new HttpRequestMessage(HttpMethod.Head, githubProxyURL + downloadUrl));
-                                long totalBytes = sizeResponse.Content.Headers.ContentLength ?? 0;
-
-                                // 创建下载请求
-                                using (var downloadResponse = await client.GetAsync(githubProxyURL + downloadUrl, HttpCompletionOption.ResponseHeadersRead))
-                                using (var contentStream = await downloadResponse.Content.ReadAsStreamAsync())
-                                using (var fileStream = new FileStream(zipFilePath, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true))
+                                // 第一次尝试：使用代理下载链接 + 当前HttpClient(不使用系统代理)
+                                try
                                 {
-                                    byte[] buffer = new byte[8192];
-                                    long totalBytesRead = 0;
-                                    int bytesRead;
+                                    Log($"[尝试1/4] 使用代理下载链接：{代理下载链接}");
+                                    downloadSuccess = await DownloadFileAsync(client, 代理下载链接, zipFilePath);
+                                }
+                                catch (Exception ex)
+                                {
+                                    Log($"[尝试1/4] 失败: {ex.Message}", true);
+                                    failureReason = ex.Message;
+                                }
 
-                                    while ((bytesRead = await contentStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                                // 如果第一次尝试失败，且代理链接与原生链接不同，使用原生下载链接尝试
+                                if (!downloadSuccess && 代理下载链接 != 原生下载链接)
+                                {
+                                    try
                                     {
-                                        await fileStream.WriteAsync(buffer, 0, bytesRead);
+                                        Log($"[尝试2/4] 使用原生下载链接：{原生下载链接}");
+                                        downloadSuccess = await DownloadFileAsync(client, 原生下载链接, zipFilePath);
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        Log($"[尝试2/4] 失败: {ex.Message}", true);
+                                        failureReason = ex.Message;
+                                    }
+                                }
 
-                                        totalBytesRead += bytesRead;
-
-                                        // 更新进度条
-                                        if (totalBytes > 0)
+                                // 如果前面的尝试都失败，创建使用系统代理的HttpClient再次尝试
+                                if (!downloadSuccess)
+                                {
+                                    try
+                                    {
+                                        Log("[尝试3/4] 使用系统代理 + 代理下载链接");
+                                        using (HttpClient proxyClient = new HttpClient())
                                         {
-                                            int progressPercentage = (int)((totalBytesRead * 100) / totalBytes);
-                                            // 确保进度值在有效范围内 (0-100)
-                                            progressPercentage = Math.Min(100, Math.Max(0, progressPercentage));
-                                            progressBar1.Value = progressPercentage;
+                                            proxyClient.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win32; x86) AppleWebKit/537.36 (KHTML, like Gecko) cmliu/SubsCheck-Win-GUI");
+                                            proxyClient.Timeout = TimeSpan.FromSeconds(30);
+
+                                            downloadSuccess = await DownloadFileAsync(proxyClient, 代理下载链接, zipFilePath);
+                                        }
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        Log($"[尝试3/4] 失败: {ex.Message}", true);
+                                        failureReason = ex.Message;
+                                    }
+
+                                    // 最后一次尝试：使用系统代理 + 原生链接（如果不同）
+                                    if (!downloadSuccess && 代理下载链接 != 原生下载链接)
+                                    {
+                                        try
+                                        {
+                                            Log("[尝试4/4] 使用系统代理 + 原生下载链接");
+                                            using (HttpClient proxyClient = new HttpClient())
+                                            {
+                                                proxyClient.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win32; x86) AppleWebKit/537.36 (KHTML, like Gecko) cmliu/SubsCheck-Win-GUI");
+                                                proxyClient.Timeout = TimeSpan.FromSeconds(30);
+
+                                                downloadSuccess = await DownloadFileAsync(proxyClient, 原生下载链接, zipFilePath);
+                                            }
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            Log($"[尝试4/4] 失败: {ex.Message}", true);
+                                            failureReason = ex.Message;
                                         }
                                     }
                                 }
 
-                                Log("下载完成，正在解压文件...");
+                                if (downloadSuccess)
+                                {
+                                    Log("下载完成，正在解压文件...");
+
+                                    // 解压文件的代码保持不变
+                                    using (System.IO.Compression.ZipArchive archive = System.IO.Compression.ZipFile.OpenRead(zipFilePath))
+                                    {
+                                        // 查找subs-check.exe
+                                        System.IO.Compression.ZipArchiveEntry exeEntry = archive.Entries.FirstOrDefault(
+                                            entry => entry.Name.Equals("subs-check.exe", StringComparison.OrdinalIgnoreCase));
+
+                                        if (exeEntry != null)
+                                        {
+                                            string exeFilePath = Path.Combine(executablePath, "subs-check.exe");
+
+                                            // 如果文件已存在，先删除
+                                            if (File.Exists(exeFilePath))
+                                            {
+                                                File.Delete(exeFilePath);
+                                            }
+
+                                            // 解压文件
+                                            exeEntry.ExtractToFile(exeFilePath);
+                                            当前subsCheck版本号 = latestVersion;
+                                            Log($"subs-check.exe {当前subsCheck版本号} 已就绪！");
+
+                                            await SaveConfig(false);
+
+                                            // 删除下载的zip文件
+                                            //File.Delete(zipFilePath);
+                                        }
+                                        else
+                                        {
+                                            Log("无法在压缩包中找到 subs-check.exe 文件。", true);
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    // 所有尝试都失败
+                                    Log($"所有下载尝试均失败，最后错误: {failureReason}", true);
+                                    MessageBox.Show($"下载 subs-check.exe 失败，请检查网络连接后重试。\n\n可尝试更换 Github Proxy 后，点击「检查更新」>「更新内核」。\n或前往 https://github.com/beck-8/subs-check/releases 自行下载！",
+                                        "下载失败", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                    progressBar1.Value = 0;
+                                }
 
                                 // 解压文件
                                 using (System.IO.Compression.ZipArchive archive = System.IO.Compression.ZipFile.OpenRead(zipFilePath))
@@ -2718,6 +2823,52 @@ namespace subs_check.win.gui
             {
                 Log($"计算计算机名MD5时出错: {ex.Message}", true);
                 return "CMLiussss";
+            }
+        }
+
+        // 添加辅助下载方法
+        async Task<bool> DownloadFileAsync(HttpClient httpClient, string url, string filePath)
+        {
+            try
+            {
+                // 获取文件大小
+                HttpResponseMessage headResponse = await httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Head, url));
+                headResponse.EnsureSuccessStatusCode(); // 确保请求成功
+                long totalBytes = headResponse.Content.Headers.ContentLength ?? 0;
+
+                // 下载文件
+                using (var response = await httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead))
+                {
+                    response.EnsureSuccessStatusCode(); // 确保请求成功
+
+                    using (var contentStream = await response.Content.ReadAsStreamAsync())
+                    using (var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true))
+                    {
+                        byte[] buffer = new byte[8192];
+                        long totalBytesRead = 0;
+                        int bytesRead;
+
+                        while ((bytesRead = await contentStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                        {
+                            await fileStream.WriteAsync(buffer, 0, bytesRead);
+                            totalBytesRead += bytesRead;
+
+                            // 更新进度条
+                            if (totalBytes > 0)
+                            {
+                                int progressPercentage = (int)((totalBytesRead * 100) / totalBytes);
+                                progressPercentage = Math.Min(100, Math.Max(0, progressPercentage));
+                                progressBar1.Value = progressPercentage;
+                            }
+                        }
+                    }
+                }
+
+                return true; // 下载成功
+            }
+            catch
+            {
+                throw; // 重新抛出异常，让调用者处理
             }
         }
     }
