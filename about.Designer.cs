@@ -56,6 +56,7 @@
             this.linkLabel5 = new System.Windows.Forms.LinkLabel();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.textBox1 = new System.Windows.Forms.TextBox();
+            this.label4 = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -160,6 +161,7 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.label4);
             this.groupBox1.Controls.Add(this.label13);
             this.groupBox1.Controls.Add(this.linkLabel4);
             this.groupBox1.Controls.Add(this.label12);
@@ -187,9 +189,9 @@
             this.label13.AutoSize = true;
             this.label13.Location = new System.Drawing.Point(113, 59);
             this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(17, 12);
+            this.label13.Size = new System.Drawing.Size(215, 12);
             this.label13.TabIndex = 17;
-            this.label13.Text = "CM";
+            this.label13.Text = "CM 就是这么简单！就是这么方便！！！";
             // 
             // linkLabel4
             // 
@@ -344,6 +346,15 @@
             this.textBox1.TabIndex = 0;
             this.textBox1.Text = resources.GetString("textBox1.Text");
             // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(166, 79);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(390, 12);
+            this.label4.TabIndex = 18;
+            this.label4.Text = "公益项目！请给我一个免费的点赞和订阅！ヾ(≧∇≦*)ゝ万分感谢！！！";
+            // 
             // about
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -406,5 +417,6 @@
         private System.Windows.Forms.LinkLabel linkLabel8;
         private System.Windows.Forms.GroupBox groupBox4;
         private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.Label label4;
     }
 }
