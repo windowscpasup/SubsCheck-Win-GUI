@@ -647,6 +647,7 @@ namespace subs_check.win.gui
                 }
                 else
                 {
+                    githubProxyURL = $"https://{comboBox3.Text}/";
                     config["githubproxy"] = comboBox3.Text;
                     config["github-proxy"] = githubProxyURL;
                 }
