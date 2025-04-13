@@ -63,6 +63,8 @@ namespace subs_check.win.gui
             toolTip1.SetToolTip(numericUpDown8, "保存几个成功的节点，不选代表不限制，内核版本需要 v2.1.0 以上\n如果你的并发数量超过这个参数，那么成功的结果可能会大于这个数值");
 
             toolTip1.SetToolTip(textBox11, "支持标准cron表达式，如：\n 0 */2 * * * 表示每2小时的整点执行\n 0 0 */2 * * 表示每2天的0点执行\n 0 0 1 * * 表示每月1日0点执行\n */30 * * * * 表示每30分钟执行一次\n\n 双击切换 使用「分钟倒计时」");
+
+            toolTip1.SetToolTip(checkBox5, "开机启动：勾选后，程序将在Windows启动时自动运行");
             // 设置通知图标的上下文菜单
             SetupNotifyIconContextMenu();
         }
@@ -178,16 +180,14 @@ namespace subs_check.win.gui
             comboBox1.Text = "本地";
             comboBox4.Text = "通用订阅";
             ReadConfig();
-            /*
-            string subsCheckPath = Path.Combine(executablePath, "subs-check.exe");
-            if (File.Exists(subsCheckPath)) button1.Enabled = true;
-            else 
+
+            if (CheckCommandLineParameter("-auto"))
             {
-                Log("没有找到 subs-check.exe 文件。", true);
-                MessageBox.Show("缺少 subs-check.exe 核心文件。\n\n您可以前往 https://github.com/beck-8/subs-check/releases 自行下载！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            */
-            await CheckGitHubVersionAsync();
+                Log("检测到开机启动，准备执行任务...");
+                button1_Click(this, EventArgs.Empty);
+                this.Hide();
+                notifyIcon1.Visible = true;
+            } else await CheckGitHubVersionAsync();
         }
 
         private async Task CheckGitHubVersionAsync()
@@ -253,6 +253,7 @@ namespace subs_check.win.gui
 
         private async void ReadConfig()//读取配置文件
         {
+            checkBox5.CheckedChanged -= checkBox5_CheckedChanged;// 临时移除事件处理器，防止触发事件
             try
             {
                 string executablePath = Path.GetDirectoryName(System.Windows.Forms.Application.ExecutablePath);
@@ -503,8 +504,11 @@ namespace subs_check.win.gui
                         textBox11.Visible = true;
                         label2.Visible = false;
                         numericUpDown2.Visible = false;
-                    } 
+                    }
 
+                    string guiauto = 读取config字符串(config, "gui-auto");
+                    if (guiauto != null && guiauto == "true") checkBox5.Checked = true;
+                    else checkBox5.Checked = false;
                 }
             }
             catch (Exception ex)
@@ -512,6 +516,7 @@ namespace subs_check.win.gui
                 MessageBox.Show($"读取配置文件时发生错误: {ex.Message}", "错误",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+            checkBox5.CheckedChanged += checkBox5_CheckedChanged;// 重新绑定事件处理器
         }
 
         private int? 读取config整数(Dictionary<string, object> config, string fieldName)
@@ -727,6 +732,8 @@ namespace subs_check.win.gui
                 config["print-progress"] = false;//是否显示进度
                 config["sub-urls-retry"] = 3;//重试次数(获取订阅失败后重试次数)
                 config["subscheck-version"] = 当前subsCheck版本号;//当前subsCheck版本号
+
+                config["gui-auto"] = checkBox5.Checked;//是否开机自启
 
                 //保存几个成功的节点，为0代表不限制 
                 if (checkBox3.Checked) config["success-limit"] = (int)numericUpDown8.Value;
@@ -1744,11 +1751,23 @@ namespace subs_check.win.gui
 
         private void 恢复窗口()
         {
-            // 显示窗体
+            // 首先显示窗体
             this.Show();
+
+            // 强制停止当前布局逻辑
+            this.SuspendLayout();
 
             // 恢复窗口状态
             this.WindowState = FormWindowState.Normal;
+
+            // 强制重新布局
+            this.ResumeLayout(true); // 参数true表示立即执行布局
+
+            // 调用刷新布局的方法
+            this.PerformLayout();
+
+            // 处理WindowsForms消息队列中的所有挂起消息
+            Application.DoEvents();
 
             // 激活窗口（使其获得焦点）
             this.Activate();
@@ -2943,6 +2962,134 @@ namespace subs_check.win.gui
                 Log($"打开MoreYAML窗口时出错: {ex.Message}", true);
                 MessageBox.Show($"打开MoreYAML窗口时出错: {ex.Message}", "错误",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private async void checkBox5_CheckedChanged(object sender, EventArgs e)
+        {
+            checkBox5.Enabled = false;
+            try
+            {
+                // 获取当前应用程序的可执行文件路径
+                string appPath = Application.ExecutablePath;
+                // 获取应用程序名称（不包含扩展名）
+                string appName = Path.GetFileNameWithoutExtension(appPath);
+                // 获取启动文件夹的路径
+                string startupFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.Startup);
+                // 快捷方式文件的完整路径
+                string shortcutPath = Path.Combine(startupFolderPath, $"{appName}.lnk");
+
+                if (checkBox5.Checked)
+                {
+                    // 检查启动文件夹中是否已存在该快捷方式
+                    if (File.Exists(shortcutPath))
+                    {
+                        Log("开机启动项已存在，无需重复创建");
+                    }
+                    else
+                    {
+                        // 创建快捷方式
+                        CreateShortcut(appPath, shortcutPath, "-auto");
+                        Log("已成功创建开机启动项，下次电脑启动时将自动运行程序");
+                    }
+                }
+                else
+                {
+                    // 删除启动项
+                    if (File.Exists(shortcutPath))
+                    {
+                        File.Delete(shortcutPath);
+                        Log("已移除开机启动项，下次开机将不会自动启动");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log($"设置开机启动项时出错: {ex.Message}", true);
+                MessageBox.Show($"设置开机启动项失败: {ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+                // 恢复CheckBox状态，避免UI状态与实际状态不一致
+                checkBox5.CheckedChanged -= checkBox5_CheckedChanged;
+                checkBox5.Checked = !checkBox5.Checked;
+                checkBox5.CheckedChanged += checkBox5_CheckedChanged;
+            }
+            checkBox5.Enabled = true;
+            await SaveConfig(false);
+        }
+
+        /// <summary>
+        /// 创建指向指定路径应用程序的快捷方式
+        /// </summary>
+        /// <param name="targetPath">目标应用程序的完整路径</param>
+        /// <param name="shortcutPath">要创建的快捷方式的完整路径</param>
+        /// <param name="arguments">可选的启动参数</param>
+        private void CreateShortcut(string targetPath, string shortcutPath, string arguments = "")
+        {
+            // 使用COM接口创建快捷方式
+            Type t = Type.GetTypeFromProgID("WScript.Shell");
+            dynamic shell = Activator.CreateInstance(t);
+            var shortcut = shell.CreateShortcut(shortcutPath);
+
+            shortcut.TargetPath = targetPath;
+            if (!string.IsNullOrEmpty(arguments))
+                shortcut.Arguments = arguments; // 设置启动参数
+
+            shortcut.WorkingDirectory = Path.GetDirectoryName(targetPath);
+            shortcut.WindowStyle = 7; // 最小化启动: 7, 正常启动: 1, 最大化启动: 3
+            shortcut.Description = "SubsCheck Win GUI自启动快捷方式";
+            shortcut.IconLocation = targetPath + ",0"; // 使用应用程序自身的图标
+
+            // 保存快捷方式
+            shortcut.Save();
+
+            // 释放COM对象
+            System.Runtime.InteropServices.Marshal.FinalReleaseComObject(shortcut);
+            System.Runtime.InteropServices.Marshal.FinalReleaseComObject(shell);
+        }
+
+        /// <summary>
+        /// 检查启动参数中是否包含指定的参数
+        /// </summary>
+        /// <param name="parameterName">要检查的参数名称，例如"-autoup"</param>
+        /// <returns>如果存在指定参数，则返回true；否则返回false</returns>
+        private bool CheckCommandLineParameter(string parameterName)
+        {
+            // 获取命令行参数数组
+            string[] args = Environment.GetCommandLineArgs();
+
+            // 遍历所有参数，检查是否有匹配的参数
+            foreach (string arg in args)
+            {
+                // 不区分大小写比较
+                if (string.Equals(arg, parameterName, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private void richTextBox1_DoubleClick(object sender, EventArgs e)
+        {
+            // 检查是否有日志内容
+            if (richTextBox1.TextLength > 0)
+            {
+                // 显示确认对话框，询问用户是否要清空日志
+                DialogResult result = MessageBox.Show(
+                    "是否要清空当前日志？",
+                    "清空日志确认",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question,
+                    MessageBoxDefaultButton.Button2); // 默认选择"否"按钮
+
+                if (result == DialogResult.Yes)
+                {
+                    // 清空richTextBox1内容
+                    richTextBox1.Clear();
+                    // 记录一条清空日志的操作信息
+                    Log("日志已清空");
+                }
             }
         }
     }
