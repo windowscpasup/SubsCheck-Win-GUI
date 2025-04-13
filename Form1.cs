@@ -176,7 +176,7 @@ namespace subs_check.win.gui
             当前GUI版本号 = "v" + myFileVersionInfo.FileVersion;
             最新GUI版本号 = 当前GUI版本号;
             标题 = "SubsCheck Win GUI " + 当前GUI版本号;
-            this.Text = 标题 + " TG:CMLiussss BY:CM喂饭 干货满满";
+            this.Text = 标题;// + " TG:CMLiussss BY:CM喂饭 干货满满";
             comboBox1.Text = "本地";
             comboBox4.Text = "通用订阅";
             ReadConfig();
