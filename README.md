@@ -45,28 +45,29 @@
 
 ## 📁 GUI 文件结构
 ```shell
-subs-check.win.gui.exe      # GUI本体
-subs-check.exe              # subs-check x86_32位 内核本体  
-subs-check_Windows_i386.zip # subs-check x86_32位 内核压缩包  
-Upgrade.exe                 # 升级程序
-Upgrade.ini                 # 升级配置文件
+subs-check.win.gui.exe       # GUI本体
+subs-check.exe               # subs-check x86_32位 内核本体  
+subs-check_Windows_i386.zip  # subs-check x86_32位 内核压缩包  
+Upgrade.exe                  # 升级程序
+Upgrade.ini                  # 升级配置文件
 config
- └─ config.yaml             # subs-check 配置文件  
+ ├─ config.yaml              # subs-check 配置文件  
+ └─ more.yaml                # 补充YAML参数配置文件  
 output
  ├─ ACL4SSR_Online_Full.yaml # ACL4SSR_Online_Full.yaml 覆写配置文件
- ├─ all.yaml                # yaml格式 测试结果
- ├─ base64.txt              # base64格式 测试结果
- ├─ bdg.yaml                # 布丁狗的订阅转换.yaml 覆写配置文件
- ├─ mihomo.yaml             # clash订阅文件 带分流规则
- ├─ node.exe                # sub-store 服务
- ├─ root.json               # sub-store 配置文件
- ├─ sub-store.bundle.js     # sub-store js文件
- ├─ sub-store.json          # sub-store json文件
- └─ sub-store.log           # sub-store 日志
-Newtonsoft.Json.dll         # 验证版本信息组件
-Newtonsoft.Json.xml         # 验证版本信息组件
-YamlDotNet.dll              # yaml读写组件
-YamlDotNet.xml              # yaml读写组件
+ ├─ all.yaml                 # yaml格式 测试结果
+ ├─ base64.txt               # base64格式 测试结果
+ ├─ bdg.yaml                 # 布丁狗的订阅转换.yaml 覆写配置文件
+ ├─ mihomo.yaml              # clash订阅文件 带分流规则
+ ├─ node.exe                 # sub-store 服务
+ ├─ root.json                # sub-store 配置文件
+ ├─ sub-store.bundle.js      # sub-store js文件
+ ├─ sub-store.json           # sub-store json文件
+ └─ sub-store.log            # sub-store 日志
+Newtonsoft.Json.dll          # 验证版本信息组件
+Newtonsoft.Json.xml          # 验证版本信息组件
+YamlDotNet.dll               # yaml读写组件
+YamlDotNet.xml               # yaml读写组件
 ```
 
 ## ⭐ Star 星星走起
