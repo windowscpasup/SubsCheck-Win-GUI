@@ -2308,7 +2308,7 @@ namespace subs_check.win.gui
                 // 使用系统默认浏览器打开URL
                 System.Diagnostics.Process.Start(url);
 
-                Log($"正在浏览器中打开 Sub-Store 管理页面: {url}");
+                Log($"正在浏览器中打开 Subs-Check 配置管理: {url}");
             }
             catch (Exception ex)
             {
