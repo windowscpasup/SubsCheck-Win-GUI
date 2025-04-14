@@ -285,13 +285,13 @@ namespace subs_check.win.gui
                     if (downloadtimeoutValue.HasValue) numericUpDown5.Value = downloadtimeoutValue.Value;
 
                     string speedTestUrl = 读取config字符串(config, "speed-test-url");
-                    if (speedTestUrl != null)  comboBox2.Text = speedTestUrl;
+                    if (speedTestUrl != null) comboBox2.Text = speedTestUrl;
 
                     string savemethod = 读取config字符串(config, "save-method");
                     if (savemethod != null)
                     {
                         if (savemethod == "local") comboBox1.Text = "本地";
-                        else  comboBox1.Text = savemethod;
+                        else comboBox1.Text = savemethod;
                     }
 
                     string listenport = 读取config字符串(config, "listen-port");
@@ -332,61 +332,30 @@ namespace subs_check.win.gui
                     }
 
                     string githubproxy = 读取config字符串(config, "githubproxy");
-                    if (githubproxy != null)
-                    {
-                        comboBox3.Text = githubproxy;
-                    }
-                    else 
-                    {
-                        string githubproxyurl = 读取config字符串(config, "github-proxy");
-                        if (githubproxyurl != null && githubproxyurl != "")
-                        {
-                            string domain = githubproxyurl;
-
-                            // 移除协议部分 (如果存在)
-                            int protocolIndex = domain.IndexOf("://");
-                            if (protocolIndex >= 0)
-                            {
-                                domain = domain.Substring(protocolIndex + 3);
-                            }
-
-                            // 移除路径部分 (如果存在)
-                            int pathIndex = domain.IndexOf('/');
-                            if (pathIndex > 0)
-                            {
-                                domain = domain.Substring(0, pathIndex);
-                            }
-
-                            comboBox3.Text = domain;
-                        }
-                        else
-                        {
-                            comboBox3.Text = "自动选择";
-                        }
-                    }
+                    if (githubproxy != null) comboBox3.Text = githubproxy;
 
                     const string githubRawPrefix = "https://raw.githubusercontent.com/";
 
                     string mihomoOverwriteUrl = 读取config字符串(config, "mihomo-overwrite-url");
                     int mihomoOverwriteUrlIndex = mihomoOverwriteUrl.IndexOf(githubRawPrefix);
-                    if (mihomoOverwriteUrl != null) 
+                    if (mihomoOverwriteUrl != null)
                     {
-                        if (mihomoOverwriteUrl.Contains("http://127.0.0")) 
+                        if (mihomoOverwriteUrl.Contains("http://127.0.0"))
                         {
                             if (mihomoOverwriteUrl.EndsWith("bdg.yaml", StringComparison.OrdinalIgnoreCase))
                             {
                                 comboBox5.Text = "[内置]布丁狗的订阅转换";
                                 await ProcessComboBox5Selection();
                             }
-                            else if (mihomoOverwriteUrl.EndsWith("ACL4SSR_Online_Full.yaml", StringComparison.OrdinalIgnoreCase)) 
+                            else if (mihomoOverwriteUrl.EndsWith("ACL4SSR_Online_Full.yaml", StringComparison.OrdinalIgnoreCase))
                             {
                                 comboBox5.Text = "[内置]ACL4SSR_Online_Full";
                                 await ProcessComboBox5Selection();
                             }
-                        } 
+                        }
                         else if (mihomoOverwriteUrlIndex > 0) comboBox5.Text = mihomoOverwriteUrl.Substring(mihomoOverwriteUrlIndex);
                         else comboBox5.Text = mihomoOverwriteUrl;
-                    } 
+                    }
 
                     // 处理URLs，检查是否包含GitHub raw链接
                     List<string> subUrls = 读取config列表(config, "sub-urls");
@@ -452,7 +421,7 @@ namespace subs_check.win.gui
                     if (subscheckversion != null) 当前subsCheck版本号 = subscheckversion;
 
                     int? successlimit = 读取config整数(config, "success-limit");
-                    if (successlimit.HasValue) 
+                    if (successlimit.HasValue)
                     {
                         if (successlimit.Value == 0)
                         {
@@ -464,7 +433,7 @@ namespace subs_check.win.gui
                             checkBox3.Checked = true;
                             numericUpDown8.Enabled = true;
                             numericUpDown8.Value = successlimit.Value;
-                        }   
+                        }
                     }
 
                     string enablewebui = 读取config字符串(config, "enable-web-ui");
@@ -472,9 +441,9 @@ namespace subs_check.win.gui
                     else checkBox4.Checked = false;
 
                     string apikey = 读取config字符串(config, "api-key");
-                    if (apikey != null) 
+                    if (apikey != null)
                     {
-                        if (apikey == GetComputerNameMD5()) 
+                        if (apikey == GetComputerNameMD5())
                         {
                             checkBox4.Checked = false;
                             string oldapikey = 读取config字符串(config, "old-api-key");
@@ -488,7 +457,7 @@ namespace subs_check.win.gui
                                 textBox10.Text = "请输入密钥";
                                 textBox10.ForeColor = Color.Gray;
                             }
-                        } 
+                        }
                         else
                         {
                             textBox10.Text = apikey;
@@ -509,6 +478,11 @@ namespace subs_check.win.gui
                     string guiauto = 读取config字符串(config, "gui-auto");
                     if (guiauto != null && guiauto == "true") checkBox5.Checked = true;
                     else checkBox5.Checked = false;
+                }
+                else
+                {
+                    comboBox3.Text = "自动选择";
+                    comboBox5.Text = "[内置]布丁狗的订阅转换";
                 }
             }
             catch (Exception ex)
@@ -613,9 +587,6 @@ namespace subs_check.win.gui
                 // 保存sub-store-port
                 config["sub-store-port"] = $@":{numericUpDown7.Value}";
 
-                // 保存githubproxy选项
-                //config["githubproxy"] = comboBox3.Text;
-
                 string githubRawPrefix = "https://raw.githubusercontent.com/";
                 if (githubProxyCheck)
                 {
@@ -640,18 +611,10 @@ namespace subs_check.win.gui
                     }
                 }
 
-                if (comboBox3.Text == "自动选择") 
-                {
-                    config["githubproxy"] = "自动选择";
-                    config["github-proxy"] = githubProxyURL;
-                }
-                else
-                {
-                    githubProxyURL = $"https://{comboBox3.Text}/";
-                    config["githubproxy"] = comboBox3.Text;
-                    config["github-proxy"] = githubProxyURL;
-                }
-                
+                if (comboBox3.Text != "自动选择") githubProxyURL = $"https://{comboBox3.Text}/";
+                config["githubproxy"] = comboBox3.Text;
+                config["github-proxy"] = githubProxyURL;
+
                 // 保存sub-urls列表
                 List<string> subUrls = new List<string>();
                 string allyamlFilePath = System.IO.Path.Combine(executablePath, "output", "all.yaml");
@@ -725,7 +688,7 @@ namespace subs_check.win.gui
                     }
                 }
                 else if (comboBox5.Text.StartsWith(githubRawPrefix)) config["mihomo-overwrite-url"] = githubProxyURL + comboBox5.Text;
-                else config["mihomo-overwrite-url"] = comboBox5.Text;
+                else config["mihomo-overwrite-url"] = comboBox5.Text != "" ? comboBox5.Text : $"http://127.0.0.1:{numericUpDown6.Value}/ACL4SSR_Online_Full.yaml";
                 
                 config["rename-node"] = checkBox1.Checked;//以节点IP查询位置重命名节点
                 config["media-check"] = checkBox2.Checked;//是否开启流媒体检测
@@ -2192,123 +2155,120 @@ namespace subs_check.win.gui
 
         private async void comboBox5_SelectedIndexChanged(object sender, EventArgs e)
         {
-            await ProcessComboBox5Selection(true);
+            if (comboBox5.Text.Contains("[内置]")) await ProcessComboBox5Selection(true);
         }
 
         private async Task ProcessComboBox5Selection(bool 汇报Log = false)
         {
-            if (comboBox5.Text.Contains("[内置]"))
+            // 确定文件名和下载URL
+            string fileName;
+            string downloadFilePath;
+            string downloadUrl;
+            string displayName;
+            string executablePath = Path.GetDirectoryName(System.Windows.Forms.Application.ExecutablePath);
+            if (comboBox5.Text.Contains("[内置]布丁狗"))
             {
-                // 确定文件名和下载URL
-                string fileName;
-                string downloadFilePath;
-                string downloadUrl;
-                string displayName;
-                string executablePath = Path.GetDirectoryName(System.Windows.Forms.Application.ExecutablePath);
-                if (comboBox5.Text.Contains("[内置]布丁狗"))
+                fileName = "bdg.yaml";
+                displayName = "[内置]布丁狗的订阅转换";
+                downloadUrl = "https://raw.githubusercontent.com/cmliu/ACL4SSR/main/yaml/bdg.yaml";
+            }
+            else // [内置]ACL4SSR
+            {
+                fileName = "ACL4SSR_Online_Full.yaml";
+                displayName = "[内置]ACL4SSR_Online_Full";
+                downloadUrl = "https://raw.githubusercontent.com/beck-8/override-hub/main/yaml/ACL4SSR_Online_Full.yaml";
+            }
+
+            // 确保output文件夹存在
+            string outputFolderPath = Path.Combine(executablePath, "output");
+            if (!Directory.Exists(outputFolderPath))
+            {
+                Directory.CreateDirectory(outputFolderPath);
+            }
+
+            // 确定文件完整路径
+            downloadFilePath = Path.Combine(outputFolderPath, fileName);
+
+            // 检查文件是否存在
+            if (!File.Exists(downloadFilePath))
+            {
+                Log($"{displayName} 覆写配置文件 未找到，正在下载...");
+
+                // 重置进度条
+                progressBar1.Value = 0;
+
+                // 添加GitHub代理前缀如果有
+                string fullDownloadUrl = githubProxyURL + downloadUrl;
+
+                try
                 {
-                    fileName = "bdg.yaml";
-                    displayName = "[内置]布丁狗的订阅转换";
-                    downloadUrl = "https://raw.githubusercontent.com/cmliu/ACL4SSR/main/yaml/bdg.yaml";
-                }
-                else // [内置]ACL4SSR
-                {
-                    fileName = "ACL4SSR_Online_Full.yaml";
-                    displayName = "[内置]ACL4SSR_Online_Full";
-                    downloadUrl = "https://raw.githubusercontent.com/beck-8/override-hub/main/yaml/ACL4SSR_Online_Full.yaml";
-                }
-
-                // 确保output文件夹存在
-                string outputFolderPath = Path.Combine(executablePath, "output");
-                if (!Directory.Exists(outputFolderPath))
-                {
-                    Directory.CreateDirectory(outputFolderPath);
-                }
-
-                // 确定文件完整路径
-                downloadFilePath = Path.Combine(outputFolderPath, fileName);
-
-                // 检查文件是否存在
-                if (!File.Exists(downloadFilePath))
-                {
-                    Log($"{displayName} 覆写配置文件 未找到，正在下载...");
-
-                    // 重置进度条
-                    progressBar1.Value = 0;
-
-                    // 添加GitHub代理前缀如果有
-                    string fullDownloadUrl = githubProxyURL + downloadUrl;
-
-                    try
+                    // 创建不使用系统代理的HttpClientHandler
+                    using (HttpClientHandler handler = new HttpClientHandler { UseProxy = false, Proxy = null })
+                    using (HttpClient client = new HttpClient(handler))
                     {
-                        // 创建不使用系统代理的HttpClientHandler
-                        using (HttpClientHandler handler = new HttpClientHandler { UseProxy = false, Proxy = null })
-                        using (HttpClient client = new HttpClient(handler))
+                        client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win32; x86) AppleWebKit/537.36 (KHTML, like Gecko) cmliu/SubsCheck-Win-GUI");
+                        client.Timeout = TimeSpan.FromSeconds(15); // 设置15秒超时
+
+                        // 先获取文件大小
+                        HttpResponseMessage headResponse = await client.SendAsync(new HttpRequestMessage(HttpMethod.Head, fullDownloadUrl));
+                        long totalBytes = headResponse.Content.Headers.ContentLength ?? 0;
+
+                        // 如果无法获取文件大小，显示不确定进度
+                        if (totalBytes == 0)
                         {
-                            client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win32; x86) AppleWebKit/537.36 (KHTML, like Gecko) cmliu/SubsCheck-Win-GUI");
-                            client.Timeout = TimeSpan.FromSeconds(15); // 设置15秒超时
+                            //Log($"无法获取 {displayName} 文件大小，将显示不确定进度");
+                        }
 
-                            // 先获取文件大小
-                            HttpResponseMessage headResponse = await client.SendAsync(new HttpRequestMessage(HttpMethod.Head, fullDownloadUrl));
-                            long totalBytes = headResponse.Content.Headers.ContentLength ?? 0;
-
-                            // 如果无法获取文件大小，显示不确定进度
-                            if (totalBytes == 0)
+                        // 创建下载请求并获取响应流
+                        using (var response = await client.GetAsync(fullDownloadUrl, HttpCompletionOption.ResponseHeadersRead))
+                        {
+                            if (response.IsSuccessStatusCode)
                             {
-                                //Log($"无法获取 {displayName} 文件大小，将显示不确定进度");
-                            }
-
-                            // 创建下载请求并获取响应流
-                            using (var response = await client.GetAsync(fullDownloadUrl, HttpCompletionOption.ResponseHeadersRead))
-                            {
-                                if (response.IsSuccessStatusCode)
+                                using (var contentStream = await response.Content.ReadAsStreamAsync())
+                                using (var fileStream = new FileStream(downloadFilePath, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true))
                                 {
-                                    using (var contentStream = await response.Content.ReadAsStreamAsync())
-                                    using (var fileStream = new FileStream(downloadFilePath, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true))
+                                    byte[] buffer = new byte[8192];
+                                    long totalBytesRead = 0;
+                                    int bytesRead;
+
+                                    while ((bytesRead = await contentStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
                                     {
-                                        byte[] buffer = new byte[8192];
-                                        long totalBytesRead = 0;
-                                        int bytesRead;
+                                        await fileStream.WriteAsync(buffer, 0, bytesRead);
+                                        totalBytesRead += bytesRead;
 
-                                        while ((bytesRead = await contentStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                                        // 更新进度条
+                                        if (totalBytes > 0)
                                         {
-                                            await fileStream.WriteAsync(buffer, 0, bytesRead);
-                                            totalBytesRead += bytesRead;
-
-                                            // 更新进度条
-                                            if (totalBytes > 0)
-                                            {
-                                                int progressPercentage = (int)((totalBytesRead * 100) / totalBytes);
-                                                // 确保进度值在有效范围内 (0-100)
-                                                progressPercentage = Math.Min(100, Math.Max(0, progressPercentage));
-                                                progressBar1.Value = progressPercentage;
-                                            }
+                                            int progressPercentage = (int)((totalBytesRead * 100) / totalBytes);
+                                            // 确保进度值在有效范围内 (0-100)
+                                            progressPercentage = Math.Min(100, Math.Max(0, progressPercentage));
+                                            progressBar1.Value = progressPercentage;
                                         }
-
-                                        // 确保进度条显示100%
-                                        progressBar1.Value = 100;
                                     }
 
-                                    Log($"{displayName} 覆写配置文件 下载成功");
+                                    // 确保进度条显示100%
+                                    progressBar1.Value = 100;
                                 }
-                                else
-                                {
-                                    Log($"{displayName} 覆写配置文件 下载失败: HTTP {(int)response.StatusCode} {response.ReasonPhrase}", true);
-                                }
+
+                                Log($"{displayName} 覆写配置文件 下载成功");
+                            }
+                            else
+                            {
+                                Log($"{displayName} 覆写配置文件 下载失败: HTTP {(int)response.StatusCode} {response.ReasonPhrase}", true);
                             }
                         }
                     }
-                    catch (Exception ex)
-                    {
-                        Log($"{displayName} 覆写配置文件 下载失败: {ex.Message}", true);
-                        // 出错时重置进度条
-                        progressBar1.Value = 0;
-                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    if (汇报Log) Log($"{displayName} 覆写配置文件 已就绪。");
+                    Log($"{displayName} 覆写配置文件 下载失败: {ex.Message}", true);
+                    // 出错时重置进度条
+                    progressBar1.Value = 0;
                 }
+            }
+            else
+            {
+                if (汇报Log) Log($"{displayName} 覆写配置文件 已就绪。");
             }
         }
 
