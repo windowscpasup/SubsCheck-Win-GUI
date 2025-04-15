@@ -759,7 +759,7 @@ namespace subs_check.win.gui
 
         private async void button1_Click(object sender, EventArgs e)
         {
-            
+            button1.Enabled = false;
             if (button1.Text == "▶️ 启动") 
             {
                 if (checkBox4.Checked && textBox10.Text == "请输入密钥")
@@ -846,6 +846,7 @@ namespace subs_check.win.gui
                 startMenuItem.Enabled = true;
                 stopMenuItem.Enabled = false;
             }
+            button1.Enabled = true;
         }
 
         private async Task DownloadSubsCheckEXE()
@@ -2285,9 +2286,9 @@ namespace subs_check.win.gui
                     "并发数设置建议：\n" +
                     "• 宽带峰值/50Mbps：一般对网络无影响\n" +
                     "• 宽带峰值/25Mbps：可能会影响同网络下载任务\n" +
-                    "• 宽带峰值/10Mbps：可能会影响同网络下其他设备的上网体验";
+                    "• 宽带峰值/10Mbps：可能会影响同网络下其他设备的上网体验\n";
 
-                MessageBox.Show(warningMessage, "网络安全警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                Log(warningMessage);
             }
         }
 
@@ -3052,6 +3053,43 @@ namespace subs_check.win.gui
                     Log("日志已清空");
                 }
             }
+        }
+
+        private void numericUpDown4_ValueChanged(object sender, EventArgs e)
+        {
+            if (numericUpDown4.Value > 4096)
+            {
+                string warningMessage =
+                    "⚠️ 测速下限设置提醒 ⚠️\n\n" +
+                    "您设置的测速下限值过高，可能导致：\n\n" +
+                    "• 可用节点数量显著减少\n" +
+                    "• 部分低速但稳定的节点被过滤\n" +
+                    "测速下限设置建议：\n" +
+                    "• 日常浏览：512-1024 KB/s\n" +
+                    "• 视频观看：1024-2048 KB/s\n" +
+                    "• 大文件下载：根据实际需求设置\n";
+
+                Log(warningMessage);
+            }
+        }
+
+        private void numericUpDown3_ValueChanged(object sender, EventArgs e)
+        {
+            if (numericUpDown3.Value < 5000)
+            {
+                string warningMessage =
+                    "⚠️ 超时时间设置提醒 ⚠️\n\n" +
+                    "该超时时间并非延迟时间，除非您的网络极其优秀，否则超时时间过低会导致无可用节点。\n\n" +
+                    "• 超时时间是真连接测试的最大等待时间\n" +
+                    "• 设置过低会导致大部分节点连接失败\n" +
+                    "• 推荐设置不低于5000ms\n\n" +
+                    "建议超时时间设置：\n" +
+                    "• 普通网络环境：5000± ms\n" +
+                    "• 极好网络环境：3000± ms\n";
+
+                Log(warningMessage);
+            }
+
         }
     }
 }
