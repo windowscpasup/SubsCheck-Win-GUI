@@ -103,15 +103,113 @@ namespace subs_check.win.gui
                     client.Timeout = TimeSpan.FromSeconds(30); // 增加超时时间以适应下载需求
 
                     string url = "https://api.github.com/repos/beck-8/subs-check/releases/latest";
+                    string 备用url = "https://api.github.cmliussss.net/repos/beck-8/subs-check/releases/latest";
 
-                    // 使用异步方法
-                    HttpResponseMessage response = await client.GetAsync(url);
+                    HttpResponseMessage response = null;
+                    string responseBody = null;
+                    JObject json = null;
 
-                    if (response.IsSuccessStatusCode)
+                    // 先尝试主URL
+                    try
                     {
-                        // 异步读取内容
-                        string responseBody = await response.Content.ReadAsStringAsync();
-                        JObject json = JObject.Parse(responseBody);
+                        response = await client.GetAsync(url);
+
+                        // 如果主URL请求成功返回有效数据
+                        if (response.IsSuccessStatusCode)
+                        {
+                            responseBody = await response.Content.ReadAsStringAsync();
+                            json = JObject.Parse(responseBody);
+                            Console.WriteLine("成功从主API获取版本信息");
+                        }
+                        // 如果主URL请求不成功但没有抛出异常
+                        else
+                        {
+                            Console.WriteLine($"主API请求失败 HTTP {(int)response.StatusCode}，尝试备用API...");
+                            response = await client.GetAsync(备用url);
+
+                            if (response.IsSuccessStatusCode)
+                            {
+                                responseBody = await response.Content.ReadAsStringAsync();
+                                json = JObject.Parse(responseBody);
+                                Console.WriteLine("成功从备用API获取版本信息");
+                            }
+                            else
+                            {
+                                Console.WriteLine($"备用API也请求失败: HTTP {(int)response.StatusCode}", true);
+                                return; // 两个URL都失败，提前退出
+                            }
+                        }
+                    }
+                    // 捕获网络请求异常（如连接超时、无法解析域名等）
+                    catch (HttpRequestException ex)
+                    {
+                        Console.WriteLine($"主API请求出错: {ex.Message}，尝试备用API...");
+                        try
+                        {
+                            response = await client.GetAsync(备用url);
+                            if (response.IsSuccessStatusCode)
+                            {
+                                responseBody = await response.Content.ReadAsStringAsync();
+                                json = JObject.Parse(responseBody);
+                                Console.WriteLine("成功从备用API获取版本信息");
+                            }
+                            else
+                            {
+                                Console.WriteLine($"备用API也请求失败: HTTP {(int)response.StatusCode}", true);
+                                return; // 备用URL也失败，提前退出
+                            }
+                        }
+                        catch (Exception backupEx)
+                        {
+                            Console.WriteLine($"备用API请求也出错: {backupEx.Message}", true);
+                            return; // 连备用URL也异常，提前退出
+                        }
+                    }
+                    // 捕获JSON解析异常
+                    catch (Newtonsoft.Json.JsonException ex)
+                    {
+                        Console.WriteLine($"解析JSON数据出错: {ex.Message}", true);
+                        try
+                        {
+                            response = await client.GetAsync(备用url);
+                            if (response.IsSuccessStatusCode)
+                            {
+                                responseBody = await response.Content.ReadAsStringAsync();
+                                json = JObject.Parse(responseBody);
+                                Console.WriteLine("成功从备用API获取版本信息");
+                            }
+                        }
+                        catch (Exception backupEx)
+                        {
+                            Console.WriteLine($"备用API请求也出错: {backupEx.Message}", true);
+                            return; // 连备用URL也有问题，提前退出
+                        }
+                    }
+                    // 捕获其他所有异常
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"获取版本信息时出现未预期的错误: {ex.Message}", true);
+                        try
+                        {
+                            response = await client.GetAsync(备用url);
+                            if (response.IsSuccessStatusCode)
+                            {
+                                responseBody = await response.Content.ReadAsStringAsync();
+                                json = JObject.Parse(responseBody);
+                                Console.WriteLine("成功从备用URL获取版本信息");
+                            }
+                        }
+                        catch (Exception backupEx)
+                        {
+                            //控制台打印错误
+                            Console.WriteLine($"备用API请求也出错: {backupEx.Message}", true);
+                            return; // 连备用URL也有问题，提前退出
+                        }
+                    }
+
+                    // 如果成功获取了JSON数据，继续处理
+                    if (json != null)
+                    {
                         string latestVersion = json["tag_name"].ToString();
                         label6.Text = latestVersion;
                         if (当前subsCheck版本号 != latestVersion)

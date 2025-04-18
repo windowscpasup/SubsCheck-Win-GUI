@@ -9,6 +9,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Net.Http;
 using System.Net.NetworkInformation;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -31,6 +32,7 @@ namespace subs_check.win.gui
         string 最新GUI版本号 = "未知版本";
         private string nextCheckTime = null;// 用于存储下次检查时间
         string WebUIapiKey = "CMLiussss";
+        int downloading = 0;
         public Form1()
         {
             InitializeComponent();
@@ -200,34 +202,15 @@ namespace subs_check.win.gui
                     return; // 静默返回，不显示错误
                 }
 
-                using (HttpClient client = new HttpClient())
+                var result = await 获取版本号("https://api.github.com/repos/cmliu/SubsCheck-Win-GUI/releases/latest");
+                if (result.Item1 != "未知版本") 
                 {
-                    try
+                    string latestVersion = result.Item1;
+                    if (latestVersion != 当前GUI版本号)
                     {
-                        client.DefaultRequestHeaders.UserAgent.ParseAdd("request");
-                        client.Timeout = TimeSpan.FromSeconds(5); // 设置5秒超时
-
-                        string url = "https://api.github.com/repos/cmliu/SubsCheck-Win-GUI/releases/latest";
-                        HttpResponseMessage response = await client.GetAsync(url);
-
-                        if (response.IsSuccessStatusCode)
-                        {
-                            string responseBody = await response.Content.ReadAsStringAsync();
-                            JObject json = JObject.Parse(responseBody);
-                            string latestVersion = json["tag_name"].ToString();
-
-                            if (latestVersion != 当前GUI版本号)
-                            {
-                                最新GUI版本号 = latestVersion;
-                                标题 = "SubsCheck Win GUI " + 当前GUI版本号 + $"  发现新版本: {最新GUI版本号} 请及时更新！";
-                                this.Text = 标题;
-                            }
-                        }
-                    }
-                    catch
-                    {
-                        // 静默处理所有异常（网络错误、超时、JSON解析错误等）
-                        return;
+                        最新GUI版本号 = latestVersion;
+                        标题 = "SubsCheck Win GUI " + 当前GUI版本号 + $"  发现新版本: {最新GUI版本号} 请及时更新！";
+                        this.Text = 标题;
                     }
                 }
             }
@@ -846,13 +829,13 @@ namespace subs_check.win.gui
                 startMenuItem.Enabled = true;
                 stopMenuItem.Enabled = false;
             }
-            button1.Enabled = true;
+            if (downloading == 0) button1.Enabled = true;
         }
 
         private async Task DownloadSubsCheckEXE()
         {
             button1.Enabled = false;
-
+            downloading = 1;
             try
             {
                 Log("正在检查网络连接...");
@@ -866,37 +849,27 @@ namespace subs_check.win.gui
                     return;
                 }
 
-                // 创建不使用系统代理的 HttpClientHandler
-                HttpClientHandler handler = new HttpClientHandler
+                var result = await 获取版本号("https://api.github.com/repos/beck-8/subs-check/releases/latest", true);
+                if (result.Item1 != "未知版本") 
                 {
-                    UseProxy = false,
-                    Proxy = null
-                };
-
-                // 使用自定义 handler 创建 HttpClient
-                using (HttpClient client = new HttpClient(handler))
-                {
-                    try
+                    // 创建不使用系统代理的 HttpClientHandler
+                    HttpClientHandler handler = new HttpClientHandler
                     {
-                        client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win32; x86) AppleWebKit/537.36 (KHTML, like Gecko) cmliu/SubsCheck-Win-GUI");
-                        client.Timeout = TimeSpan.FromSeconds(30); // 增加超时时间以适应下载需求
+                        UseProxy = false,
+                        Proxy = null
+                    };
 
-                        Log("正在获取最新版本 subs-check.exe 内核下载地址...");
-                        string url = "https://api.github.com/repos/beck-8/subs-check/releases/latest";
-
-                        // 使用异步方法
-                        HttpResponseMessage response = await client.GetAsync(url);
-
-                        if (response.IsSuccessStatusCode)
+                    // 使用自定义 handler 创建 HttpClient
+                    using (HttpClient client = new HttpClient(handler)) 
+                    {
+                        try
                         {
-                            // 异步读取内容
-                            string responseBody = await response.Content.ReadAsStringAsync();
-                            JObject json = JObject.Parse(responseBody);
-                            string latestVersion = json["tag_name"].ToString();
+                            string latestVersion = result.Item1;
+                            JArray assets = result.Item2;
                             Log($"subs-check.exe 最新版本为: {latestVersion} ");
                             // 查找Windows i386版本的资源
                             string downloadUrl = null;
-                            JArray assets = (JArray)json["assets"];
+
                             foreach (var asset in assets)
                             {
                                 if (asset["name"].ToString() == "subs-check_Windows_i386.zip")
@@ -1096,18 +1069,14 @@ namespace subs_check.win.gui
                                     "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
                             }
                         }
-                        else
+                        catch (Exception ex)
                         {
-                            Log($"获取版本信息失败: HTTP {(int)response.StatusCode} {response.ReasonPhrase}", true);
+                            Log($"下载过程中出错: {ex.Message}", true);
+                            MessageBox.Show($"下载 subs-check.exe 时出错: {ex.Message}\n\n可尝试更换 Github Proxy 后，点击「检查更新」>「更新内核」。\n或前往 https://github.com/beck-8/subs-check/releases 自行下载！",
+                                "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
                     }
-                    catch (Exception ex)
-                    {
-                        Log($"下载过程中出错: {ex.Message}", true);
-                        MessageBox.Show($"下载 subs-check.exe 时出错: {ex.Message}\n\n可尝试更换 Github Proxy 后，点击「检查更新」>「更新内核」。\n或前往 https://github.com/beck-8/subs-check/releases 自行下载！",
-                            "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                }
+                }               
             }
             catch (Exception ex)
             {
@@ -1116,6 +1085,147 @@ namespace subs_check.win.gui
             }
 
             button1.Enabled = true;
+            downloading = 0;
+        }
+
+        /// <summary>
+        /// 获取最新版本号和对应的下载链接
+        /// </summary>
+        /// <param name="版本号URL">API请求URL</param>
+        /// <param name="是否输出log">是否在日志中输出信息</param>
+        /// <returns>包含最新版本号和下载链接的元组</returns>
+        private async Task<(string LatestVersion, JArray assets)> 获取版本号(string 版本号URL, bool 是否输出log = false)
+        {
+            string latestVersion = "未知版本";
+            JArray assets = null;
+
+            // 创建不使用系统代理的 HttpClientHandler
+            HttpClientHandler handler = new HttpClientHandler
+            {
+                UseProxy = false,
+                Proxy = null
+            };
+
+            // 使用自定义 handler 创建 HttpClient
+            using (HttpClient client = new HttpClient(handler))
+            {
+                client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win32; x86) AppleWebKit/537.36 (KHTML, like Gecko) cmliu/SubsCheck-Win-GUI");
+                client.Timeout = TimeSpan.FromSeconds(30); // 增加超时时间以适应下载需求
+
+                if (是否输出log) Log("正在获取最新版本 subs-check.exe 内核下载地址...");
+                string url = 版本号URL;
+                string 备用url = 版本号URL.Replace("api.github.com", "api.github.cmliussss.net");
+
+                HttpResponseMessage response = null;
+                string responseBody = null;
+                JObject json = null;
+
+                // 先尝试主URL
+                try
+                {
+                    response = await client.GetAsync(url);
+
+                    // 如果主URL请求成功返回有效数据
+                    if (response.IsSuccessStatusCode)
+                    {
+                        responseBody = await response.Content.ReadAsStringAsync();
+                        json = JObject.Parse(responseBody);
+                        if (是否输出log) Log("成功从主API获取版本信息");
+                    }
+                    // 如果主URL请求不成功但没有抛出异常
+                    else
+                    {
+                        if (是否输出log) Log($"主API请求失败 HTTP {(int)response.StatusCode}，尝试备用API...");
+                        response = await client.GetAsync(备用url);
+
+                        if (response.IsSuccessStatusCode)
+                        {
+                            responseBody = await response.Content.ReadAsStringAsync();
+                            json = JObject.Parse(responseBody);
+                            if (是否输出log) Log("成功从备用API获取版本信息");
+                        }
+                        else
+                        {
+                            if (是否输出log) Log($"备用API也请求失败: HTTP {(int)response.StatusCode}", true);
+                            return (latestVersion, assets); // 两个URL都失败，提前退出
+                        }
+                    }
+                }
+                // 捕获网络请求异常（如连接超时、无法解析域名等）
+                catch (HttpRequestException ex)
+                {
+                    if (是否输出log) Log($"主API请求出错: {ex.Message}，尝试备用API...");
+                    try
+                    {
+                        response = await client.GetAsync(备用url);
+                        if (response.IsSuccessStatusCode)
+                        {
+                            responseBody = await response.Content.ReadAsStringAsync();
+                            json = JObject.Parse(responseBody);
+                            if (是否输出log) Log("成功从备用API获取版本信息");
+                        }
+                        else
+                        {
+                            if (是否输出log) Log($"备用API也请求失败: HTTP {(int)response.StatusCode}", true);
+                            return (latestVersion, assets); // 备用URL也失败，提前退出
+                        }
+                    }
+                    catch (Exception backupEx)
+                    {
+                        if (是否输出log) Log($"备用API请求也出错: {backupEx.Message}", true);
+                        return (latestVersion, assets); // 连备用URL也异常，提前退出
+                    }
+                }
+                // 捕获JSON解析异常
+                catch (Newtonsoft.Json.JsonException ex)
+                {
+                    if (是否输出log) Log($"解析JSON数据出错: {ex.Message}", true);
+                    try
+                    {
+                        response = await client.GetAsync(备用url);
+                        if (response.IsSuccessStatusCode)
+                        {
+                            responseBody = await response.Content.ReadAsStringAsync();
+                            json = JObject.Parse(responseBody);
+                            if (是否输出log) Log("成功从备用API获取版本信息");
+                        }
+                    }
+                    catch (Exception backupEx)
+                    {
+                        if (是否输出log) Log($"备用API请求也出错: {backupEx.Message}", true);
+                        return (latestVersion, assets); // 连备用URL也有问题，提前退出
+                    }
+                }
+                // 捕获其他所有异常
+                catch (Exception ex)
+                {
+                    if (是否输出log) Log($"获取版本信息时出现未预期的错误: {ex.Message}", true);
+                    try
+                    {
+                        response = await client.GetAsync(备用url);
+                        if (response.IsSuccessStatusCode)
+                        {
+                            responseBody = await response.Content.ReadAsStringAsync();
+                            json = JObject.Parse(responseBody);
+                            if (是否输出log) Log("成功从备用URL获取版本信息");
+                        }
+                    }
+                    catch (Exception backupEx)
+                    {
+                        if (是否输出log) Log($"备用API请求也出错: {backupEx.Message}", true);
+                        return (latestVersion, assets); // 连备用URL也有问题，提前退出
+                    }
+                }
+
+                // 如果成功获取了JSON数据，继续处理
+                if (json != null)
+                {
+                    latestVersion = json["tag_name"].ToString();
+                    assets = (JArray)json["assets"];
+                }
+            }
+
+            return (latestVersion, assets);
         }
 
 
@@ -2217,7 +2327,7 @@ namespace subs_check.win.gui
                         // 如果无法获取文件大小，显示不确定进度
                         if (totalBytes == 0)
                         {
-                            //Log($"无法获取 {displayName} 文件大小，将显示不确定进度");
+                            Console.WriteLine($"无法获取 {displayName} 文件大小，将显示不确定进度");
                         }
 
                         // 创建下载请求并获取响应流
