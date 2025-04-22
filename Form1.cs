@@ -774,7 +774,7 @@ namespace subs_check.win.gui
                 groupBox6.Enabled = false;
                 if (checkBox4.Checked) button6.Enabled = true;
                 button1.Text = "⏹️ 停止";
-                timer3.Enabled = true;
+                //timer3.Enabled = true;
                 // 清空 richTextBox1
                 richTextBox1.Clear();
                 await KillNodeProcessAsync();
@@ -824,7 +824,7 @@ namespace subs_check.win.gui
                 groupBox6.Enabled = true;
                 button6.Enabled = false;
                 button1.Text = "▶️ 启动";
-                timer3.Enabled = false;
+                //timer3.Enabled = false;
                 // 更新菜单项的启用状态
                 startMenuItem.Enabled = true;
                 stopMenuItem.Enabled = false;
