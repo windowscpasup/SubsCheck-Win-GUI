@@ -2,6 +2,7 @@
 首先声明，这款软件并非我原创开发。Subs-Check是由 [bestruirui](https://github.com/bestruirui/BestSub) 原创、由 [beck-8](https://github.com/beck-8/subs-check) 进行二次开发，而我所编写的 GUI 仅是在这两位开发者的原始版本基础上进行的 **二次开发**。
 
 - **视频教程：[永久免费0门槛！小白也有无限高速代理节点！](https://youtu.be/sS9Tuf1PCyc)**
+- **数字签名：[关于项目报毒说明](https://www.youtube.com/watch?v=4906t5zygAE&t=123s)**
 - **Telegram交流群：[@CMLiussss](https://t.me/CMLiussss)**
 
 # ⚠️ 免责声明
